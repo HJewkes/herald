@@ -1,0 +1,121 @@
+{
+  "planId": "2026-02-20-herald-mvp",
+  "createdAt": "2026-02-20T00:00:00Z",
+  "goal": "Build Herald MVP: scheduled autonomous Claude Code agent with backlog management, budget enforcement, and iMessage notifications",
+  "tasks": [
+    {
+      "id": "task-01",
+      "name": "Project scaffold",
+      "briefing": "briefings/task-01.md",
+      "wave": 1,
+      "dependsOn": [],
+      "fileOwnership": ["package.json", "tsconfig.json", "vitest.config.ts", "tsup.config.ts", "CLAUDE.md", ".gitignore"],
+      "status": "pending"
+    },
+    {
+      "id": "task-02",
+      "name": "Type definitions",
+      "briefing": "briefings/task-02.md",
+      "wave": 1,
+      "dependsOn": [],
+      "fileOwnership": ["src/types.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-03",
+      "name": "Config loader",
+      "briefing": "briefings/task-03.md",
+      "wave": 2,
+      "dependsOn": ["task-01", "task-02"],
+      "fileOwnership": ["src/config.ts", "__tests__/config.test.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-04",
+      "name": "Backlog parser",
+      "briefing": "briefings/task-04.md",
+      "wave": 2,
+      "dependsOn": ["task-01", "task-02"],
+      "fileOwnership": ["src/backlog/parser.ts", "__tests__/backlog/parser.test.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-05",
+      "name": "Backlog store",
+      "briefing": "briefings/task-05.md",
+      "wave": 3,
+      "dependsOn": ["task-04"],
+      "fileOwnership": ["src/backlog/store.ts", "__tests__/backlog/store.test.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-06",
+      "name": "Backlog prioritizer",
+      "briefing": "briefings/task-06.md",
+      "wave": 3,
+      "dependsOn": ["task-05"],
+      "fileOwnership": ["src/backlog/prioritizer.ts", "__tests__/backlog/prioritizer.test.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-07",
+      "name": "Budget tracker",
+      "briefing": "briefings/task-07.md",
+      "wave": 2,
+      "dependsOn": ["task-01", "task-02"],
+      "fileOwnership": ["src/budget/tracker.ts", "__tests__/budget/tracker.test.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-08",
+      "name": "iMessage notifier",
+      "briefing": "briefings/task-08.md",
+      "wave": 2,
+      "dependsOn": ["task-01", "task-02"],
+      "fileOwnership": ["src/notify/imessage.ts", "__tests__/notify/imessage.test.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-09",
+      "name": "Journal logger",
+      "briefing": "briefings/task-09.md",
+      "wave": 2,
+      "dependsOn": ["task-01", "task-02"],
+      "fileOwnership": ["src/journal/logger.ts", "__tests__/journal/logger.test.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-10",
+      "name": "Claude runner",
+      "briefing": "briefings/task-10.md",
+      "wave": 3,
+      "dependsOn": ["task-03", "task-06", "task-07"],
+      "fileOwnership": ["src/runner/invoke.ts", "src/runner/prompts.ts", "src/runner/output.ts", "__tests__/runner/invoke.test.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-11",
+      "name": "CLI commands + heartbeat",
+      "briefing": "briefings/task-11.md",
+      "wave": 4,
+      "dependsOn": ["task-05", "task-06", "task-07", "task-08", "task-09", "task-10", "task-12"],
+      "fileOwnership": ["src/cli.ts", "src/commands/run.ts", "src/commands/backlog.ts", "src/commands/budget.ts", "src/commands/journal.ts", "src/commands/notify.ts", "src/commands/schedule.ts", "src/commands/config.ts"],
+      "status": "pending"
+    },
+    {
+      "id": "task-12",
+      "name": "launchd scheduler",
+      "briefing": "briefings/task-12.md",
+      "wave": 3,
+      "dependsOn": ["task-03"],
+      "fileOwnership": ["src/scheduler.ts", "__tests__/scheduler.test.ts"],
+      "status": "pending"
+    }
+  ],
+  "waves": [
+    { "id": 1, "tasks": ["task-01", "task-02"], "gate": "npm run typecheck passes" },
+    { "id": 2, "tasks": ["task-03", "task-04", "task-07", "task-08", "task-09"], "gate": "npm test passes + npm run typecheck clean" },
+    { "id": 3, "tasks": ["task-05", "task-06", "task-10", "task-12"], "gate": "npm test passes + npm run typecheck clean" },
+    { "id": 4, "tasks": ["task-11"], "gate": "npm test passes + npm run typecheck clean + herald run --dry executes without error" }
+  ]
+}

@@ -21,11 +21,13 @@ function makeItem(overrides: Partial<BacklogItem>): BacklogItem {
 }
 
 const healthyBudget: BudgetStatus = {
-  usedUsd: 40,
-  limitUsd: 100,
-  usedPct: 40,
-  overWarning: false,
-  overHardCap: false,
+  usedTokens: 500000,
+  paceCap: 2000000,
+  weeklyLimit: 5000000,
+  dayOfWeek: 3,
+  usedPct: 10,
+  paceCapPct: 40,
+  overPace: false,
 };
 
 describe('selectTasks', () => {
@@ -50,7 +52,7 @@ describe('selectTasks', () => {
   });
 
   it('returns empty when budget is over hard cap', () => {
-    const overBudget: BudgetStatus = { ...healthyBudget, overHardCap: true };
+    const overBudget: BudgetStatus = { ...healthyBudget, overPace: true };
     const items = [makeItem({ id: 'a', status: 'pending' })];
     const selected = selectTasks(items, overBudget);
     expect(selected).toEqual([]);

@@ -27,11 +27,11 @@ describe('loadConfig', () => {
   it('merges partial config with defaults', () => {
     vi.mocked(existsSync).mockReturnValue(true);
     vi.mocked(readFileSync).mockReturnValue(
-      JSON.stringify({ budget: { monthlyLimitUsd: 200 } })
+      JSON.stringify({ budget: { weeklyTokenLimit: 10000000 } })
     );
     const config = loadConfig('/fake/project');
-    expect(config.budget.monthlyLimitUsd).toBe(200);
-    expect(config.budget.warningThresholdPct).toBe(DEFAULT_CONFIG.budget.warningThresholdPct);
+    expect(config.budget.weeklyTokenLimit).toBe(10000000);
+    expect(config.budget.bufferDays).toBe(DEFAULT_CONFIG.budget.bufferDays);
   });
 
   it('resolves backlogDir and journalDir relative to project root', () => {
@@ -58,8 +58,8 @@ describe('loadConfig', () => {
   it('throws when budget fields have wrong types', () => {
     vi.mocked(existsSync).mockReturnValue(true);
     vi.mocked(readFileSync).mockReturnValue(
-      JSON.stringify({ budget: { monthlyLimitUsd: 'free' } })
+      JSON.stringify({ budget: { weeklyTokenLimit: 'free' } })
     );
-    expect(() => loadConfig('/fake/project')).toThrow('Invalid config: budget.monthlyLimitUsd must be a number');
+    expect(() => loadConfig('/fake/project')).toThrow('Invalid config: budget.weeklyTokenLimit must be a number');
   });
 });

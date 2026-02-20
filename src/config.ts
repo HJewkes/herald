@@ -4,9 +4,8 @@ import type { HeraldConfig } from './types.js';
 
 export const DEFAULT_CONFIG: HeraldConfig = {
   budget: {
-    monthlyLimitUsd: 100,
-    warningThresholdPct: 70,
-    hardCapPct: 85,
+    weeklyTokenLimit: 5000000,
+    bufferDays: 1,
     defaultMaxTokensPerTask: 50000,
   },
   schedule: {
@@ -28,9 +27,8 @@ function validateConfig(config: Record<string, unknown>): HeraldConfig {
     throw new Error('Invalid config: budget must be an object');
   }
   const b = budget as Record<string, unknown>;
-  if (typeof b.monthlyLimitUsd !== 'number') throw new Error('Invalid config: budget.monthlyLimitUsd must be a number');
-  if (typeof b.warningThresholdPct !== 'number') throw new Error('Invalid config: budget.warningThresholdPct must be a number');
-  if (typeof b.hardCapPct !== 'number') throw new Error('Invalid config: budget.hardCapPct must be a number');
+  if (typeof b.weeklyTokenLimit !== 'number') throw new Error('Invalid config: budget.weeklyTokenLimit must be a number');
+  if (typeof b.bufferDays !== 'number') throw new Error('Invalid config: budget.bufferDays must be a number');
   if (typeof b.defaultMaxTokensPerTask !== 'number') throw new Error('Invalid config: budget.defaultMaxTokensPerTask must be a number');
 
   const schedule = config.schedule;

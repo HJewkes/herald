@@ -22,11 +22,13 @@ describe('formatSummary', () => {
       tasksBlocked: [],
       needsInput: ['Should stale notes auto-archive?'],
       budget: {
-        usedUsd: 42,
-        limitUsd: 100,
-        usedPct: 42,
-        overWarning: false,
-        overHardCap: false,
+        usedTokens: 500000,
+        paceCap: 2000000,
+        weeklyLimit: 5000000,
+        dayOfWeek: 3,
+        usedPct: 10,
+        paceCapPct: 40,
+        overPace: false,
       },
     };
 
@@ -35,7 +37,7 @@ describe('formatSummary', () => {
     expect(msg).toContain('Fix brain search');
     expect(msg).toContain('Add fuzzy matching');
     expect(msg).toContain('auto-archive');
-    expect(msg).toContain('$42/$100');
+    expect(msg).toContain('day 3/7');
   });
 
   it('handles empty summary', () => {
@@ -46,11 +48,13 @@ describe('formatSummary', () => {
       tasksBlocked: [],
       needsInput: [],
       budget: {
-        usedUsd: 0,
-        limitUsd: 100,
+        usedTokens: 0,
+        paceCap: 2000000,
+        weeklyLimit: 5000000,
+        dayOfWeek: 3,
         usedPct: 0,
-        overWarning: false,
-        overHardCap: false,
+        paceCapPct: 40,
+        overPace: false,
       },
     };
 

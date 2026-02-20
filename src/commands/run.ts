@@ -26,18 +26,17 @@ export const runCommand = new Command("run")
       }
 
       try {
-        const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
-        const budget = await checkBudget(config.budget, apiKey);
+        const budget = checkBudget(config.budget, config.journalDir);
 
-        if (budget.overHardCap) {
+        if (budget.overPace) {
           console.log(
-            `Budget exceeded: $${budget.usedUsd}/$${budget.limitUsd} (${budget.usedPct}%)`,
+            `Over pace: ${budget.usedTokens.toLocaleString()}/${budget.paceCap.toLocaleString()} tokens (day ${budget.dayOfWeek}/7, ${budget.usedPct}% of weekly limit)`,
           );
           if (config.notify.imessage.recipient) {
             try {
               sendIMessage(
                 config.notify.imessage.recipient,
-                `Herald: Budget limit reached ($${budget.usedUsd}/$${budget.limitUsd}). Skipping run.`,
+                `Herald: Over pace (${budget.usedPct}% used, cap ${budget.paceCapPct}% for day ${budget.dayOfWeek}). Skipping run.`,
               );
             } catch (err) {
               const msg = err instanceof Error ? err.message : String(err);
@@ -90,7 +89,7 @@ export const runCommand = new Command("run")
             console.log(`  [${task.priority}] ${task.title} (${task.id})`);
           }
           console.log(
-            `\nBudget: $${budget.usedUsd}/$${budget.limitUsd} (${budget.usedPct}%)`,
+            `\nBudget: ${budget.usedTokens.toLocaleString()}/${budget.paceCap.toLocaleString()} tokens (day ${budget.dayOfWeek}/7, ${budget.usedPct}% of weekly limit)`,
           );
           return;
         }

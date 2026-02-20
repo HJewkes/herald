@@ -3,18 +3,15 @@ import { loadConfig } from "../config.js";
 import { checkBudget } from "../budget/tracker.js";
 
 export const budgetCommand = new Command("budget")
-  .description("Show current usage vs limits")
+  .description("Show current usage vs pace cap")
   .option("--project-root <path>", "Herald project root", process.cwd())
-  .action(async (opts) => {
+  .action((opts) => {
     const config = loadConfig(opts.projectRoot);
-    const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
-    const status = await checkBudget(config.budget, apiKey);
+    const status = checkBudget(config.budget, config.journalDir);
 
     console.log(
-      `Usage: $${status.usedUsd}/$${status.limitUsd} (${status.usedPct}%)`,
+      `Day ${status.dayOfWeek}/7 — ${status.usedTokens.toLocaleString()} / ${status.paceCap.toLocaleString()} tokens (${status.usedPct}% of ${status.weeklyLimit.toLocaleString()} weekly limit)`,
     );
-    if (status.overHardCap) console.log("STATUS: OVER HARD CAP — runs blocked");
-    else if (status.overWarning)
-      console.log("STATUS: WARNING — approaching limit");
+    if (status.overPace) console.log("STATUS: OVER PACE — runs paused");
     else console.log("STATUS: OK");
   });

@@ -47,9 +47,8 @@ import { acquireLock, releaseLock } from '../../src/lockfile.js';
 function makeConfig(overrides: Partial<HeraldConfig> = {}): HeraldConfig {
   return {
     budget: {
-      monthlyLimitUsd: 100,
-      warningThresholdPct: 70,
-      hardCapPct: 85,
+      weeklyTokenLimit: 5000000,
+      bufferDays: 1,
       defaultMaxTokensPerTask: 50000,
     },
     schedule: { times: ['09:00'], timezone: 'America/Denver' },
@@ -79,19 +78,23 @@ function makeItem(overrides: Partial<BacklogItem> = {}): BacklogItem {
 }
 
 const healthyBudget: BudgetStatus = {
-  usedUsd: 40,
-  limitUsd: 100,
-  usedPct: 40,
-  overWarning: false,
-  overHardCap: false,
+  usedTokens: 500000,
+  paceCap: 2000000,
+  weeklyLimit: 5000000,
+  dayOfWeek: 3,
+  usedPct: 10,
+  paceCapPct: 40,
+  overPace: false,
 };
 
-const overBudget: BudgetStatus = {
-  usedUsd: 90,
-  limitUsd: 100,
-  usedPct: 90,
-  overWarning: true,
-  overHardCap: true,
+const overPaceBudget: BudgetStatus = {
+  usedTokens: 3000000,
+  paceCap: 1428571,
+  weeklyLimit: 5000000,
+  dayOfWeek: 1,
+  usedPct: 60,
+  paceCapPct: 29,
+  overPace: true,
 };
 
 const mockStore = {
@@ -115,7 +118,7 @@ describe('run command', () => {
     vi.mocked(loadConfig).mockReturnValue(makeConfig());
     vi.mocked(acquireLock).mockReturnValue(true);
     vi.mocked(BacklogStore).mockImplementation(() => mockStore as unknown as BacklogStore);
-    vi.mocked(checkBudget).mockResolvedValue(healthyBudget);
+    vi.mocked(checkBudget).mockReturnValue(healthyBudget);
     mockStore.list.mockReturnValue({ items: [], warnings: [] });
     vi.mocked(selectTasks).mockReturnValue([]);
     vi.mocked(formatSummary).mockReturnValue('Summary message');
@@ -147,15 +150,15 @@ describe('run command', () => {
     expect(releaseLock).toHaveBeenCalledOnce();
   });
 
-  it('skips execution and sends budget notification when budget exceeded', async () => {
-    vi.mocked(checkBudget).mockResolvedValue(overBudget);
+  it('skips execution and sends pace notification when over pace', async () => {
+    vi.mocked(checkBudget).mockReturnValue(overPaceBudget);
 
     await runAction();
 
     expect(invokeClaudeCode).not.toHaveBeenCalled();
     expect(sendIMessage).toHaveBeenCalledWith(
       '+15551234567',
-      expect.stringContaining('Budget limit reached'),
+      expect.stringContaining('Over pace'),
     );
     expect(releaseLock).toHaveBeenCalledOnce();
   });

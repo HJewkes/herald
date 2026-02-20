@@ -1,44 +1,68 @@
+import { readEntries } from '../journal/logger.js';
 import type { BudgetConfig, BudgetStatus } from '../types.js';
 
-export function computeBudgetStatus(usedUsd: number, config: BudgetConfig): BudgetStatus {
-  const usedPct = config.monthlyLimitUsd > 0
-    ? Math.round((usedUsd / config.monthlyLimitUsd) * 100)
+export function getWeekStart(now: Date): Date {
+  const d = new Date(now);
+  const day = d.getDay();
+  const diff = day === 0 ? 6 : day - 1; // Monday = 0
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+export function getDayOfWeek(now: Date): number {
+  const day = now.getDay();
+  return day === 0 ? 7 : day; // Monday=1 ... Sunday=7
+}
+
+export function computePaceCap(
+  dayOfWeek: number,
+  bufferDays: number,
+  weeklyLimit: number,
+): number {
+  return Math.floor(((dayOfWeek + bufferDays) / 7) * weeklyLimit);
+}
+
+export function computeBudgetStatus(
+  usedTokens: number,
+  dayOfWeek: number,
+  config: BudgetConfig,
+): BudgetStatus {
+  const paceCap = computePaceCap(dayOfWeek, config.bufferDays, config.weeklyTokenLimit);
+  const usedPct = config.weeklyTokenLimit > 0
+    ? Math.round((usedTokens / config.weeklyTokenLimit) * 100)
+    : 0;
+  const paceCapPct = config.weeklyTokenLimit > 0
+    ? Math.round((paceCap / config.weeklyTokenLimit) * 100)
     : 0;
 
   return {
-    usedUsd,
-    limitUsd: config.monthlyLimitUsd,
+    usedTokens,
+    paceCap,
+    weeklyLimit: config.weeklyTokenLimit,
+    dayOfWeek,
     usedPct,
-    overWarning: usedPct >= config.warningThresholdPct,
-    overHardCap: usedPct >= config.hardCapPct,
+    paceCapPct,
+    overPace: usedTokens >= paceCap,
   };
 }
 
-export async function checkBudget(config: BudgetConfig, apiKey: string): Promise<BudgetStatus> {
-  if (!apiKey) {
-    throw new Error(
-      'ANTHROPIC_API_KEY is not set. Budget cannot be verified — blocking run for safety.',
-    );
-  }
+export function checkBudget(
+  config: BudgetConfig,
+  journalDir: string,
+  now = new Date(),
+): BudgetStatus {
+  const weekStart = getWeekStart(now);
+  const entries = readEntries(journalDir, 500);
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/usage', {
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-    });
-
-    if (!response.ok) {
-      console.error(`Budget API returned ${response.status}, assuming permissive`);
-      return computeBudgetStatus(0, config);
+  let usedTokens = 0;
+  for (const entry of entries) {
+    const entryDate = new Date(entry.timestamp);
+    if (entryDate >= weekStart) {
+      usedTokens += entry.tokensUsed ?? 0;
     }
-
-    const data = (await response.json()) as { total_cost_usd?: number };
-    const usedUsd = data.total_cost_usd ?? 0;
-    return computeBudgetStatus(usedUsd, config);
-  } catch (err) {
-    console.error(`Budget check failed: ${err instanceof Error ? err.message : err}`);
-    return computeBudgetStatus(0, config);
   }
+
+  const dayOfWeek = getDayOfWeek(now);
+  return computeBudgetStatus(usedTokens, dayOfWeek, config);
 }

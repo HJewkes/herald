@@ -8,7 +8,7 @@ const PRIORITY_ORDER: Record<Priority, number> = {
 };
 
 export function selectTasks(items: BacklogItem[], budget: BudgetStatus): BacklogItem[] {
-  if (budget.overHardCap) return [];
+  if (budget.overPace) return [];
 
   const eligible = items
     .filter((item) => {

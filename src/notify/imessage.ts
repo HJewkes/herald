@@ -75,8 +75,8 @@ export function formatSummary(summary: HeartbeatSummary): string {
     lines.push('', 'No tasks to process.');
   }
 
-  const { usedUsd, limitUsd, usedPct } = summary.budget;
-  lines.push('', `Budget: $${usedUsd}/$${limitUsd} (${usedPct}%)`);
+  const { usedTokens, paceCap, usedPct, dayOfWeek } = summary.budget;
+  lines.push('', `Pace: ${usedTokens.toLocaleString()}/${paceCap.toLocaleString()} tokens (day ${dayOfWeek}/7, ${usedPct}% weekly)`);
 
   return lines.join('\n');
 }

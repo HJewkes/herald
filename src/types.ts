@@ -29,9 +29,8 @@ export interface HeraldConfig {
 }
 
 export interface BudgetConfig {
-  monthlyLimitUsd: number;
-  warningThresholdPct: number;
-  hardCapPct: number;
+  weeklyTokenLimit: number;
+  bufferDays: number;
   defaultMaxTokensPerTask: number;
 }
 
@@ -47,11 +46,13 @@ export interface NotifyConfig {
 }
 
 export interface BudgetStatus {
-  usedUsd: number;
-  limitUsd: number;
+  usedTokens: number;
+  paceCap: number;
+  weeklyLimit: number;
+  dayOfWeek: number;
   usedPct: number;
-  overWarning: boolean;
-  overHardCap: boolean;
+  paceCapPct: number;
+  overPace: boolean;
 }
 
 export interface JournalEntry {

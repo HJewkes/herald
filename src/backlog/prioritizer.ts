@@ -1,4 +1,4 @@
-import { parseExpression } from 'cron-parser';
+import cronParser from 'cron-parser';
 import type { BacklogItem, BudgetStatus, Priority } from '../types.js';
 
 const PRIORITY_ORDER: Record<Priority, number> = {
@@ -32,7 +32,7 @@ export function isRecurringDue(item: BacklogItem): boolean {
   if (!item.lastRun) return true;
 
   const lastRun = new Date(item.lastRun);
-  const interval = parseExpression(item.schedule);
+  const interval = cronParser.parseExpression(item.schedule);
   const prev = interval.prev().toDate();
 
   return prev > lastRun;

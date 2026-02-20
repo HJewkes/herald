@@ -40,4 +40,10 @@ describe('loadConfig', () => {
     expect(config.backlogDir).toBe('/my/project/backlog/active');
     expect(config.journalDir).toBe('/my/project/journal');
   });
+
+  it('throws clear error on invalid JSON', () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(readFileSync).mockReturnValue('{ invalid json }');
+    expect(() => loadConfig('/fake/project')).toThrow('Invalid JSON in herald.config.json');
+  });
 });

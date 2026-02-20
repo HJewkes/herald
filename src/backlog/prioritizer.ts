@@ -31,9 +31,13 @@ export function isRecurringDue(item: BacklogItem): boolean {
   if (!item.schedule) return false;
   if (!item.lastRun) return true;
 
-  const lastRun = new Date(item.lastRun);
-  const interval = cronParser.parseExpression(item.schedule);
-  const prev = interval.prev().toDate();
-
-  return prev > lastRun;
+  try {
+    const lastRun = new Date(item.lastRun);
+    const interval = cronParser.parseExpression(item.schedule);
+    const prev = interval.prev().toDate();
+    return prev > lastRun;
+  } catch {
+    console.error(`Invalid cron expression for task ${item.id}: ${item.schedule}`);
+    return false;
+  }
 }

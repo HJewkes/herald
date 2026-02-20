@@ -76,4 +76,18 @@ describe('isRecurringDue', () => {
     const item = makeItem({ type: 'task' });
     expect(isRecurringDue(item)).toBe(false);
   });
+
+  it('handles invalid cron expression gracefully', () => {
+    const item = makeItem({
+      type: 'recurring',
+      schedule: 'not-a-cron',
+      lastRun: '2026-02-19T09:00:00Z',
+    });
+    expect(isRecurringDue(item)).toBe(false);
+  });
+
+  it('recurring item without schedule returns false', () => {
+    const item = makeItem({ type: 'recurring', schedule: undefined });
+    expect(isRecurringDue(item)).toBe(false);
+  });
 });

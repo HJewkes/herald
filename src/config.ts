@@ -28,7 +28,12 @@ export function loadConfig(projectRoot: string): HeraldConfig {
 
   if (existsSync(configPath)) {
     const raw = readFileSync(configPath, 'utf-8');
-    userConfig = JSON.parse(raw) as Record<string, unknown>;
+    try {
+      userConfig = JSON.parse(raw) as Record<string, unknown>;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Invalid JSON in herald.config.json: ${msg}`);
+    }
   }
 
   const merged = deepMerge(

@@ -1,0 +1,40 @@
+{
+  "name": "@titan-design/herald",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Autonomous scheduled Claude Code agent with backlog management",
+  "license": "MIT",
+  "bin": {
+    "herald": "dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src __tests__ --no-error-on-unmatched-pattern",
+    "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\""
+  },
+  "dependencies": {
+    "@commander-js/extra-typings": "^13.1.0",
+    "commander": "^13.1.0",
+    "cron-parser": "^4.9.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/node": "^22.13.4",
+    "eslint": "^9.20.0",
+    "prettier": "^3.8.1",
+    "tsup": "^8.3.6",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.1",
+    "vitest": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

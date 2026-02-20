@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.tsbuildinfo
+journal/*.json
+herald.config.json

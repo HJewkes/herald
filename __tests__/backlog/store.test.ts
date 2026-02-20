@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BacklogStore } from '../../src/backlog/store.js';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 vi.mock('node:fs', () => ({
+  existsSync: vi.fn(),
   readdirSync: vi.fn(),
   readFileSync: vi.fn(),
   writeFileSync: vi.fn(),
@@ -32,6 +33,7 @@ describe('BacklogStore', () => {
   });
 
   it('lists all markdown files as backlog items', () => {
+    vi.mocked(existsSync).mockReturnValue(true);
     vi.mocked(readdirSync).mockReturnValue(['task-001.md', 'task-002.md', '.gitkeep'] as unknown as ReturnType<typeof readdirSync>);
     vi.mocked(readFileSync).mockReturnValue(ITEM_CONTENT);
     const items = store.list();
@@ -40,9 +42,26 @@ describe('BacklogStore', () => {
   });
 
   it('ignores non-markdown files', () => {
+    vi.mocked(existsSync).mockReturnValue(true);
     vi.mocked(readdirSync).mockReturnValue(['.gitkeep', 'notes.txt'] as unknown as ReturnType<typeof readdirSync>);
     const items = store.list();
     expect(items).toHaveLength(0);
+  });
+
+  it('returns empty array when directory does not exist', () => {
+    vi.mocked(existsSync).mockReturnValue(false);
+    const items = store.list();
+    expect(items).toEqual([]);
+  });
+
+  it('skips malformed files and continues processing', () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(readdirSync).mockReturnValue(['good.md', 'bad.md'] as unknown as ReturnType<typeof readdirSync>);
+    vi.mocked(readFileSync)
+      .mockReturnValueOnce(ITEM_CONTENT)
+      .mockReturnValueOnce('not valid frontmatter {{{{');
+    const items = store.list();
+    expect(items).toHaveLength(1);
   });
 
   it('updates item status in frontmatter', () => {

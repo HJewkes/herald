@@ -28,6 +28,15 @@ describe('acquireLock', () => {
     expect(acquireLock('/project')).toBe(false);
   });
 
+  it('rejects lock from live process even if old', () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    const oldTimestamp = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({ pid: process.pid, timestamp: oldTimestamp })
+    );
+    expect(acquireLock('/project')).toBe(false);
+  });
+
   it('overrides stale lock from dead process', () => {
     vi.mocked(existsSync).mockReturnValue(true);
     vi.mocked(readFileSync).mockReturnValue(

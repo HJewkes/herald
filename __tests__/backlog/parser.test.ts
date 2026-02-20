@@ -67,4 +67,55 @@ created: 2026-02-20
     expect(item.tags).toEqual([]);
     expect(item.lastRun).toBeNull();
   });
+
+  it('throws on invalid type value', () => {
+    const bad = `---
+id: test-001
+type: bogus
+priority: high
+status: pending
+created: 2026-02-20
+---
+# Bad type`;
+    expect(() => parseBacklogItem(bad, '/path/bad.md')).toThrow('invalid type: "bogus"');
+  });
+
+  it('throws on invalid priority value', () => {
+    const bad = `---
+id: test-001
+type: task
+priority: critical
+status: pending
+created: 2026-02-20
+---
+# Bad priority`;
+    expect(() => parseBacklogItem(bad, '/path/bad.md')).toThrow('invalid priority: "critical"');
+  });
+
+  it('throws on invalid status value', () => {
+    const bad = `---
+id: test-001
+type: task
+priority: high
+status: archived
+created: 2026-02-20
+---
+# Bad status`;
+    expect(() => parseBacklogItem(bad, '/path/bad.md')).toThrow('invalid status: "archived"');
+  });
+
+  it('converts Date objects in created/lastRun to ISO strings', () => {
+    const withDate = `---
+id: test-001
+type: task
+priority: high
+status: pending
+created: 2026-02-20
+lastRun: 2026-02-19
+---
+# Date test`;
+    const item = parseBacklogItem(withDate, '/path/date.md');
+    expect(item.created).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    expect(item.lastRun).toMatch(/^\d{4}-\d{2}-\d{2}/);
+  });
 });

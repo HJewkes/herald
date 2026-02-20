@@ -25,7 +25,13 @@ export function invokeClaudeCode(item: BacklogItem, maxTurns: number): RunResult
 
     return parseOutput(output, item.id);
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const isNotFound =
+      err instanceof Error && 'code' in err && err.code === 'ENOENT';
+    const message = isNotFound
+      ? 'claude binary not found in PATH. Ensure Claude Code CLI is installed and available.'
+      : err instanceof Error
+        ? err.message
+        : String(err);
     return {
       taskId: item.id,
       success: false,

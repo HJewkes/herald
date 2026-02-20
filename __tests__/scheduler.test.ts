@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   generatePlist,
+  buildLaunchdPath,
   installSchedule,
   uninstallSchedule,
   getScheduleStatus,
@@ -24,6 +25,32 @@ const schedule: ScheduleConfig = {
   timezone: 'America/Los_Angeles',
 };
 
+describe('buildLaunchdPath', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('includes default directories', () => {
+    vi.mocked(execFileSync).mockImplementation((cmd) => {
+      if (cmd === 'which') throw new Error('not found');
+      return '';
+    });
+    const path = buildLaunchdPath();
+    expect(path).toContain('/usr/local/bin');
+    expect(path).toContain('/opt/homebrew/bin');
+    expect(path).toContain('.claude/bin');
+  });
+
+  it('includes detected claude binary directory', () => {
+    vi.mocked(execFileSync).mockImplementation((cmd) => {
+      if (cmd === 'which') return '/custom/path/bin/claude\n';
+      return '';
+    });
+    const path = buildLaunchdPath();
+    expect(path).toContain('/custom/path/bin');
+  });
+});
+
 describe('generatePlist', () => {
   it('generates valid plist XML with calendar intervals', () => {
     const plist = generatePlist(schedule, '/Users/test/herald');
@@ -35,6 +62,16 @@ describe('generatePlist', () => {
     expect(plist).toContain('<integer>18</integer>');
     expect(plist).toContain('herald');
     expect(plist).toContain('run');
+  });
+
+  it('throws on invalid time format', () => {
+    const bad = { times: ['9am'], timezone: 'America/Los_Angeles' };
+    expect(() => generatePlist(bad, '/Users/test/herald')).toThrow('Invalid schedule time "9am"');
+  });
+
+  it('throws on out-of-range time values', () => {
+    const bad = { times: ['25:00'], timezone: 'America/Los_Angeles' };
+    expect(() => generatePlist(bad, '/Users/test/herald')).toThrow('hour must be 0-23');
   });
 
   it('includes project root as argument', () => {
@@ -51,10 +88,11 @@ describe('installSchedule', () => {
   it('writes plist and loads with launchctl', () => {
     installSchedule(schedule, '/Users/test/herald');
     expect(vi.mocked(writeFileSync)).toHaveBeenCalledOnce();
-    expect(vi.mocked(execFileSync)).toHaveBeenCalled();
-    const [cmd, args] = vi.mocked(execFileSync).mock.calls[0];
-    expect(cmd).toBe('launchctl');
-    expect(args).toContain('load');
+    const launchctlCall = vi.mocked(execFileSync).mock.calls.find(
+      ([cmd]) => cmd === 'launchctl',
+    );
+    expect(launchctlCall).toBeDefined();
+    expect(launchctlCall![1]).toContain('load');
   });
 });
 

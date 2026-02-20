@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { writeFileSync, existsSync, unlinkSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { homedir } from 'node:os';
 import type { ScheduleConfig } from './types.js';
 
@@ -11,6 +11,31 @@ const PLIST_PATH = join(
   'LaunchAgents',
   `${PLIST_LABEL}.plist`,
 );
+
+const DEFAULT_PATH_DIRS = [
+  '/usr/local/bin',
+  '/usr/bin',
+  '/bin',
+  '/opt/homebrew/bin',
+  join(homedir(), '.claude', 'bin'),
+  join(homedir(), '.npm-global', 'bin'),
+];
+
+export function buildLaunchdPath(): string {
+  const dirs = new Set(DEFAULT_PATH_DIRS);
+  try {
+    const claudePath = execFileSync('which', ['claude'], {
+      encoding: 'utf-8',
+      timeout: 5000,
+    }).trim();
+    if (claudePath) {
+      dirs.add(dirname(claudePath));
+    }
+  } catch {
+    // claude not found in current PATH — rely on default dirs
+  }
+  return [...dirs].join(':');
+}
 
 function escapeXml(str: string): string {
   return str
@@ -27,7 +52,15 @@ export function generatePlist(
   const safeRoot = escapeXml(projectRoot);
   const calendarIntervals = schedule.times
     .map((time) => {
-      const [hour, minute] = time.split(':').map(Number);
+      const match = time.match(/^(\d{1,2}):(\d{2})$/);
+      if (!match) {
+        throw new Error(`Invalid schedule time "${time}": expected HH:MM format`);
+      }
+      const hour = Number(match[1]);
+      const minute = Number(match[2]);
+      if (hour > 23 || minute > 59) {
+        throw new Error(`Invalid schedule time "${time}": hour must be 0-23, minute must be 0-59`);
+      }
       return `      <dict>
         <key>Hour</key>
         <integer>${hour}</integer>
@@ -61,7 +94,7 @@ ${calendarIntervals}
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key>
-    <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+    <string>${escapeXml(buildLaunchdPath())}</string>
   </dict>
 </dict>
 </plist>`;

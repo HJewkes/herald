@@ -89,6 +89,18 @@ describe('invokeClaudeCode', () => {
     expect(result.success).toBe(false);
   });
 
+  it('returns specific message when claude binary is not found', () => {
+    vi.mocked(execFileSync).mockImplementation(() => {
+      const err = new Error('spawn claude ENOENT') as NodeJS.ErrnoException;
+      err.code = 'ENOENT';
+      throw err;
+    });
+
+    const result = invokeClaudeCode(makeItem(), 10);
+    expect(result.success).toBe(false);
+    expect(result.output).toContain('claude binary not found in PATH');
+  });
+
   it('omits --allowedTools when allowedTools is empty', () => {
     vi.mocked(execFileSync).mockReturnValue(JSON.stringify({ result: 'Done' }));
     invokeClaudeCode(makeItem({ allowedTools: [] }), 5);

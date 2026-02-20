@@ -16,7 +16,9 @@ export function computeBudgetStatus(usedUsd: number, config: BudgetConfig): Budg
 
 export async function checkBudget(config: BudgetConfig, apiKey: string): Promise<BudgetStatus> {
   if (!apiKey) {
-    return computeBudgetStatus(0, config);
+    throw new Error(
+      'ANTHROPIC_API_KEY is not set. Budget cannot be verified — blocking run for safety.',
+    );
   }
 
   try {

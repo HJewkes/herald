@@ -22,6 +22,40 @@ export const DEFAULT_CONFIG: HeraldConfig = {
   journalDir: 'journal',
 };
 
+function validateConfig(config: Record<string, unknown>): HeraldConfig {
+  const budget = config.budget;
+  if (typeof budget !== 'object' || budget === null) {
+    throw new Error('Invalid config: budget must be an object');
+  }
+  const b = budget as Record<string, unknown>;
+  if (typeof b.monthlyLimitUsd !== 'number') throw new Error('Invalid config: budget.monthlyLimitUsd must be a number');
+  if (typeof b.warningThresholdPct !== 'number') throw new Error('Invalid config: budget.warningThresholdPct must be a number');
+  if (typeof b.hardCapPct !== 'number') throw new Error('Invalid config: budget.hardCapPct must be a number');
+  if (typeof b.defaultMaxTokensPerTask !== 'number') throw new Error('Invalid config: budget.defaultMaxTokensPerTask must be a number');
+
+  const schedule = config.schedule;
+  if (typeof schedule !== 'object' || schedule === null) {
+    throw new Error('Invalid config: schedule must be an object');
+  }
+  const s = schedule as Record<string, unknown>;
+  if (!Array.isArray(s.times)) throw new Error('Invalid config: schedule.times must be an array');
+  if (typeof s.timezone !== 'string') throw new Error('Invalid config: schedule.timezone must be a string');
+
+  const notify = config.notify;
+  if (typeof notify !== 'object' || notify === null) {
+    throw new Error('Invalid config: notify must be an object');
+  }
+  const n = notify as Record<string, unknown>;
+  if (typeof n.imessage !== 'object' || n.imessage === null) {
+    throw new Error('Invalid config: notify.imessage must be an object');
+  }
+
+  if (typeof config.backlogDir !== 'string') throw new Error('Invalid config: backlogDir must be a string');
+  if (typeof config.journalDir !== 'string') throw new Error('Invalid config: journalDir must be a string');
+
+  return config as unknown as HeraldConfig;
+}
+
 export function loadConfig(projectRoot: string): HeraldConfig {
   const configPath = join(projectRoot, 'herald.config.json');
   let userConfig: Record<string, unknown> = {};
@@ -37,13 +71,14 @@ export function loadConfig(projectRoot: string): HeraldConfig {
   }
 
   const merged = deepMerge(
-    DEFAULT_CONFIG as unknown as Record<string, unknown>,
+    structuredClone(DEFAULT_CONFIG) as unknown as Record<string, unknown>,
     userConfig,
-  ) as unknown as HeraldConfig;
-  merged.backlogDir = join(projectRoot, merged.backlogDir);
-  merged.journalDir = join(projectRoot, merged.journalDir);
+  );
+  const config = validateConfig(merged);
+  config.backlogDir = join(projectRoot, config.backlogDir);
+  config.journalDir = join(projectRoot, config.journalDir);
 
-  return merged;
+  return config;
 }
 
 function deepMerge(

@@ -90,4 +90,16 @@ describe('isRecurringDue', () => {
     const item = makeItem({ type: 'recurring', schedule: undefined });
     expect(isRecurringDue(item)).toBe(false);
   });
+
+  it('returns false when lastRun is after the most recent scheduled time', () => {
+    // Schedule: daily at 09:00. If lastRun is after today's 09:00, not due yet.
+    const now = new Date();
+    const recentRun = new Date(now.getTime() + 60_000).toISOString();
+    const item = makeItem({
+      type: 'recurring',
+      schedule: '0 9 * * *',
+      lastRun: recentRun,
+    });
+    expect(isRecurringDue(item)).toBe(false);
+  });
 });

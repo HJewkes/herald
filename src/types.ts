@@ -75,6 +75,11 @@ export interface RunResult {
   needsInput?: string;
 }
 
+export interface BacklogListResult {
+  items: BacklogItem[];
+  warnings: string[];
+}
+
 export interface HeartbeatSummary {
   timestamp: string;
   tasksCompleted: string[];

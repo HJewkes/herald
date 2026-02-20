@@ -13,13 +13,8 @@ export function acquireLock(projectRoot: string): boolean {
 
       try {
         process.kill(pid, 0);
-        const age = Date.now() - new Date(timestamp).getTime();
-        const maxAge = 30 * 60 * 1000;
-        if (age > maxAge) {
-          console.log(`Stale lock from PID ${pid} (${Math.round(age / 60000)}m old), overriding`);
-        } else {
-          return false;
-        }
+        // Process is alive — never override regardless of age
+        return false;
       } catch {
         console.log(`Removing stale lock from dead PID ${pid}`);
       }

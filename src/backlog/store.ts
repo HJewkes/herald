@@ -1,19 +1,20 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import matter from 'gray-matter';
-import type { BacklogItem, TaskStatus } from '../types.js';
+import type { BacklogItem, BacklogListResult, TaskStatus } from '../types.js';
 import { parseBacklogItem } from './parser.js';
 
 export class BacklogStore {
   constructor(private readonly dir: string) {}
 
-  list(): BacklogItem[] {
-    if (!existsSync(this.dir)) return [];
+  list(): BacklogListResult {
+    if (!existsSync(this.dir)) return { items: [], warnings: [] };
 
     const files = readdirSync(this.dir)
       .filter((f) => f.endsWith('.md'));
 
     const items: BacklogItem[] = [];
+    const warnings: string[] = [];
     for (const f of files) {
       const filePath = join(this.dir, f);
       try {
@@ -21,10 +22,12 @@ export class BacklogStore {
         items.push(parseBacklogItem(content, filePath));
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        console.error(`Skipping malformed backlog item ${f}: ${msg}`);
+        const warning = `Skipping malformed backlog item ${f}: ${msg}`;
+        console.error(warning);
+        warnings.push(warning);
       }
     }
-    return items;
+    return { items, warnings };
   }
 
   updateStatus(filePath: string, status: TaskStatus): void {

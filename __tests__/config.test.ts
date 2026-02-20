@@ -46,4 +46,20 @@ describe('loadConfig', () => {
     vi.mocked(readFileSync).mockReturnValue('{ invalid json }');
     expect(() => loadConfig('/fake/project')).toThrow('Invalid JSON in herald.config.json');
   });
+
+  it('throws when merged config has invalid shape', () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({ budget: 'not-an-object' })
+    );
+    expect(() => loadConfig('/fake/project')).toThrow('Invalid config: budget must be an object');
+  });
+
+  it('throws when budget fields have wrong types', () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({ budget: { monthlyLimitUsd: 'free' } })
+    );
+    expect(() => loadConfig('/fake/project')).toThrow('Invalid config: budget.monthlyLimitUsd must be a number');
+  });
 });

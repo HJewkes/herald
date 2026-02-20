@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
@@ -12,10 +12,19 @@ const PLIST_PATH = join(
   `${PLIST_LABEL}.plist`,
 );
 
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export function generatePlist(
   schedule: ScheduleConfig,
   projectRoot: string,
 ): string {
+  const safeRoot = escapeXml(projectRoot);
   const calendarIntervals = schedule.times
     .map((time) => {
       const [hour, minute] = time.split(':').map(Number);
@@ -39,16 +48,16 @@ export function generatePlist(
     <string>herald</string>
     <string>run</string>
     <string>--project-root</string>
-    <string>${projectRoot}</string>
+    <string>${safeRoot}</string>
   </array>
   <key>StartCalendarInterval</key>
   <array>
 ${calendarIntervals}
   </array>
   <key>StandardOutPath</key>
-  <string>${join(projectRoot, 'journal', 'launchd-stdout.log')}</string>
+  <string>${escapeXml(join(projectRoot, 'journal', 'launchd-stdout.log'))}</string>
   <key>StandardErrorPath</key>
-  <string>${join(projectRoot, 'journal', 'launchd-stderr.log')}</string>
+  <string>${escapeXml(join(projectRoot, 'journal', 'launchd-stderr.log'))}</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key>
@@ -64,7 +73,7 @@ export function installSchedule(
 ): void {
   const plist = generatePlist(schedule, projectRoot);
   writeFileSync(PLIST_PATH, plist);
-  execSync(`launchctl load ${PLIST_PATH}`);
+  execFileSync('launchctl', ['load', PLIST_PATH]);
 }
 
 export function uninstallSchedule(): void {
@@ -72,7 +81,7 @@ export function uninstallSchedule(): void {
     console.log('No schedule installed.');
     return;
   }
-  execSync(`launchctl unload ${PLIST_PATH}`);
+  execFileSync('launchctl', ['unload', PLIST_PATH]);
   unlinkSync(PLIST_PATH);
 }
 
@@ -82,7 +91,7 @@ export function getScheduleStatus(): string {
   }
 
   try {
-    const output = execSync(`launchctl list ${PLIST_LABEL}`, {
+    const output = execFileSync('launchctl', ['list', PLIST_LABEL], {
       encoding: 'utf-8',
     });
     return `Schedule: installed\n${output}`;

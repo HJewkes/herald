@@ -1,10 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { formatSummary, sendIMessage } from '../../src/notify/imessage.js';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { writeFileSync, unlinkSync } from 'node:fs';
 import type { HeartbeatSummary } from '../../src/types.js';
 
 vi.mock('node:child_process', () => ({
-  execSync: vi.fn(),
+  execFileSync: vi.fn(),
+}));
+
+vi.mock('node:fs', () => ({
+  writeFileSync: vi.fn(),
+  unlinkSync: vi.fn(),
 }));
 
 describe('formatSummary', () => {
@@ -59,18 +65,41 @@ describe('sendIMessage', () => {
     vi.resetAllMocks();
   });
 
-  it('calls osascript with correct AppleScript', () => {
+  it('writes script to temp file and calls osascript', () => {
     sendIMessage('+15551234567', 'Hello from Herald');
-    expect(vi.mocked(execSync)).toHaveBeenCalledOnce();
-    const cmd = vi.mocked(execSync).mock.calls[0][0] as string;
-    expect(cmd).toContain('osascript');
-    expect(cmd).toContain('Hello from Herald');
-    expect(cmd).toContain('+15551234567');
+    expect(vi.mocked(writeFileSync)).toHaveBeenCalledOnce();
+    const scriptContent = vi.mocked(writeFileSync).mock.calls[0][1] as string;
+    expect(scriptContent).toContain('Hello from Herald');
+    expect(scriptContent).toContain('+15551234567');
+    expect(vi.mocked(execFileSync)).toHaveBeenCalledOnce();
+    const [cmd, args] = vi.mocked(execFileSync).mock.calls[0];
+    expect(cmd).toBe('osascript');
+    expect((args as string[])[0]).toMatch(/herald-imessage-.*\.scpt$/);
   });
 
-  it('escapes special characters in message', () => {
+  it('escapes double quotes in message', () => {
     sendIMessage('+15551234567', 'Test "quotes" & backslash\\');
-    const cmd = vi.mocked(execSync).mock.calls[0][0] as string;
-    expect(cmd).not.toContain('"quotes"');
+    const scriptContent = vi.mocked(writeFileSync).mock.calls[0][1] as string;
+    expect(scriptContent).not.toContain('"quotes"');
+    expect(scriptContent).toContain('\\"quotes\\"');
+  });
+
+  it('escapes newlines in message', () => {
+    sendIMessage('+15551234567', 'Line one\nLine two');
+    const scriptContent = vi.mocked(writeFileSync).mock.calls[0][1] as string;
+    expect(scriptContent).toContain('Line one\\nLine two');
+  });
+
+  it('handles single quotes in message', () => {
+    sendIMessage('+15551234567', "it's a test");
+    const scriptContent = vi.mocked(writeFileSync).mock.calls[0][1] as string;
+    expect(scriptContent).toContain("it's a test");
+  });
+
+  it('escapes recipient', () => {
+    sendIMessage('user"@evil.com', 'Hello');
+    const scriptContent = vi.mocked(writeFileSync).mock.calls[0][1] as string;
+    expect(scriptContent).toContain('user\\"@evil.com');
+    expect(scriptContent).not.toContain('user"@evil.com');
   });
 });

@@ -5,12 +5,12 @@ import {
   uninstallSchedule,
   getScheduleStatus,
 } from '../src/scheduler.js';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import type { ScheduleConfig } from '../src/types.js';
 
 vi.mock('node:child_process', () => ({
-  execSync: vi.fn(),
+  execFileSync: vi.fn(),
 }));
 
 vi.mock('node:fs', () => ({
@@ -51,9 +51,10 @@ describe('installSchedule', () => {
   it('writes plist and loads with launchctl', () => {
     installSchedule(schedule, '/Users/test/herald');
     expect(vi.mocked(writeFileSync)).toHaveBeenCalledOnce();
-    expect(vi.mocked(execSync)).toHaveBeenCalled();
-    const cmd = vi.mocked(execSync).mock.calls[0][0] as string;
-    expect(cmd).toContain('launchctl');
+    expect(vi.mocked(execFileSync)).toHaveBeenCalled();
+    const [cmd, args] = vi.mocked(execFileSync).mock.calls[0];
+    expect(cmd).toBe('launchctl');
+    expect(args).toContain('load');
   });
 });
 
@@ -65,22 +66,22 @@ describe('uninstallSchedule', () => {
   it('unloads and removes plist when it exists', () => {
     vi.mocked(existsSync).mockReturnValue(true);
     uninstallSchedule();
-    expect(vi.mocked(execSync)).toHaveBeenCalled();
+    expect(vi.mocked(execFileSync)).toHaveBeenCalled();
     expect(vi.mocked(unlinkSync)).toHaveBeenCalled();
   });
 
   it('does nothing when plist does not exist', () => {
     vi.mocked(existsSync).mockReturnValue(false);
     uninstallSchedule();
-    expect(vi.mocked(execSync)).not.toHaveBeenCalled();
+    expect(vi.mocked(execFileSync)).not.toHaveBeenCalled();
   });
 });
 
 describe('getScheduleStatus', () => {
   it('returns installed status when plist exists', () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(execSync).mockReturnValue(
-      Buffer.from('PID\tStatus\tLabel\n-\t0\tcom.herald.scheduler'),
+    vi.mocked(execFileSync).mockReturnValue(
+      'PID\tStatus\tLabel\n-\t0\tcom.herald.scheduler',
     );
     const status = getScheduleStatus();
     expect(status).toContain('installed');

@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import matter from 'gray-matter';
-import type { BacklogItem, BacklogListResult, TaskStatus } from '../types.js';
+import type { BacklogItem, BacklogListResult, Priority, TaskStatus } from '../types.js';
 import { parseBacklogItem } from './parser.js';
 
 export class BacklogStore {
@@ -42,6 +42,14 @@ export class BacklogStore {
     const content = readFileSync(filePath, 'utf-8');
     const { data, content: body } = matter(content);
     data.lastRun = timestamp;
+    const updated = matter.stringify(body, data);
+    writeFileSync(filePath, updated);
+  }
+
+  updatePriority(filePath: string, priority: Priority): void {
+    const content = readFileSync(filePath, 'utf-8');
+    const { data, content: body } = matter(content);
+    data.priority = priority;
     const updated = matter.stringify(body, data);
     writeFileSync(filePath, updated);
   }

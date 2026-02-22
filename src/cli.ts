@@ -28,6 +28,7 @@ import { journalCommand } from "./commands/journal.js";
 import { notifyCommand } from "./commands/notify.js";
 import { scheduleCommand } from "./commands/schedule.js";
 import { configCommand } from "./commands/config.js";
+import { channelCommand } from "./commands/channel.js";
 
 // Load .env from project root (passed via --project-root) or cwd
 const projectRootIdx = process.argv.indexOf("--project-root");
@@ -48,6 +49,7 @@ program.addCommand(journalCommand);
 program.addCommand(notifyCommand);
 program.addCommand(scheduleCommand);
 program.addCommand(configCommand);
+program.addCommand(channelCommand);
 
 program.parseAsync().catch((err: Error) => {
   process.stderr.write(`Error: ${err.message}\n`);

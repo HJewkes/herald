@@ -80,4 +80,11 @@ describe('BacklogStore', () => {
     const written = vi.mocked(writeFileSync).mock.calls[0][1] as string;
     expect(written).toContain("lastRun: '2026-02-20T12:00:00Z'");
   });
+
+  it('updates priority in frontmatter', () => {
+    vi.mocked(readFileSync).mockReturnValue(ITEM_CONTENT);
+    store.updatePriority('/fake/backlog/active/task-001.md', 'low');
+    const written = vi.mocked(writeFileSync).mock.calls[0][1] as string;
+    expect(written).toContain('priority: low');
+  });
 });

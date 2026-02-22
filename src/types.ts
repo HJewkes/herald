@@ -89,3 +89,42 @@ export interface HeartbeatSummary {
   needsInput: string[];
   budget: BudgetStatus;
 }
+
+// Slack integration types
+
+export interface SlackPostResult {
+  ts: string;
+  channel: string;
+}
+
+export interface SlackMessage {
+  ts: string;
+  user: string;
+  text: string;
+  threadTs?: string;
+}
+
+export interface SlackReaction {
+  name: string;
+  users: string[];
+}
+
+export interface SlackFile {
+  id: string;
+  name: string;
+  permalink: string;
+}
+
+export type SlackCommand =
+  | { type: 'skip'; taskId: string }
+  | { type: 'unblock'; taskId: string }
+  | { type: 'pause' }
+  | { type: 'resume' }
+  | { type: 'priority'; taskId: string; priority: Priority }
+  | { type: 'status' };
+
+export interface SlackState {
+  lastCheckedTs: string;
+  pauseRequested: boolean;
+  messageMap: Record<string, string>;
+}

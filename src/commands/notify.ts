@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
 import { loadConfig } from "../config.js";
-import { sendIMessage } from "../notify/imessage.js";
+import { sendSlack } from "../notify/slack.js";
 
 export const notifyCommand = new Command("notify").description(
   "Notification management",
@@ -8,23 +8,23 @@ export const notifyCommand = new Command("notify").description(
 
 notifyCommand
   .command("test")
-  .description("Send a test iMessage")
+  .description("Send a test Slack message")
   .option("--project-root <path>", "Herald project root", process.cwd())
-  .action((opts) => {
+  .action(async (opts) => {
     const config = loadConfig(opts.projectRoot);
-    const recipient = config.notify.imessage.recipient;
+    const channel = config.notify.slack.channel;
 
-    if (!recipient) {
+    if (!channel) {
       console.error(
-        "No iMessage recipient configured. Set notify.imessage.recipient in herald.config.json",
+        "No Slack channel configured. Set notify.slack.channel in herald.config.json",
       );
       process.exitCode = 1;
       return;
     }
 
-    sendIMessage(
-      recipient,
-      "Herald test message. If you see this, notifications are working.",
+    await sendSlack(
+      channel,
+      "Herald test message. If you see this, notifications are working. :wave:",
     );
-    console.log(`Test message sent to ${recipient}`);
+    console.log(`Test message sent to ${channel}`);
   });

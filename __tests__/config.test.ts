@@ -55,6 +55,14 @@ describe('loadConfig', () => {
     expect(() => loadConfig('/fake/project')).toThrow('Invalid config: budget must be an object');
   });
 
+  it('throws when notify.slack is missing', () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({ notify: { slack: null } })
+    );
+    expect(() => loadConfig('/fake/project')).toThrow('Invalid config: notify.slack must be an object');
+  });
+
   it('throws when budget fields have wrong types', () => {
     vi.mocked(existsSync).mockReturnValue(true);
     vi.mocked(readFileSync).mockReturnValue(

@@ -21,8 +21,8 @@ vi.mock('../../src/runner/invoke.js', () => ({
   invokeClaudeCode: vi.fn(),
 }));
 
-vi.mock('../../src/notify/imessage.js', () => ({
-  sendIMessage: vi.fn(),
+vi.mock('../../src/notify/slack.js', () => ({
+  sendSlack: vi.fn().mockResolvedValue(undefined),
   formatSummary: vi.fn(),
 }));
 
@@ -40,7 +40,7 @@ import { BacklogStore } from '../../src/backlog/store.js';
 import { selectTasks } from '../../src/backlog/prioritizer.js';
 import { checkBudget } from '../../src/budget/tracker.js';
 import { invokeClaudeCode } from '../../src/runner/invoke.js';
-import { sendIMessage, formatSummary } from '../../src/notify/imessage.js';
+import { sendSlack, formatSummary } from '../../src/notify/slack.js';
 import { writeEntry } from '../../src/journal/logger.js';
 import { acquireLock, releaseLock } from '../../src/lockfile.js';
 
@@ -52,7 +52,7 @@ function makeConfig(overrides: Partial<HeraldConfig> = {}): HeraldConfig {
       defaultMaxTokensPerTask: 50000,
     },
     schedule: { times: ['09:00'], timezone: 'America/Denver' },
-    notify: { imessage: { recipient: '+15551234567' } },
+    notify: { slack: { channel: '#herald' } },
     backlogDir: '/fake/backlog',
     journalDir: '/fake/journal',
     ...overrides,
@@ -146,7 +146,7 @@ describe('run command', () => {
       '/fake/journal',
       expect.objectContaining({ taskId: 'task-001', status: 'success' }),
     );
-    expect(sendIMessage).toHaveBeenCalledWith('+15551234567', 'Summary message');
+    expect(sendSlack).toHaveBeenCalledWith('#herald', 'Summary message');
     expect(releaseLock).toHaveBeenCalledOnce();
   });
 
@@ -156,8 +156,8 @@ describe('run command', () => {
     await runAction();
 
     expect(invokeClaudeCode).not.toHaveBeenCalled();
-    expect(sendIMessage).toHaveBeenCalledWith(
-      '+15551234567',
+    expect(sendSlack).toHaveBeenCalledWith(
+      '#herald',
       expect.stringContaining('Over pace'),
     );
     expect(releaseLock).toHaveBeenCalledOnce();
@@ -173,7 +173,7 @@ describe('run command', () => {
 
     expect(invokeClaudeCode).not.toHaveBeenCalled();
     expect(writeEntry).not.toHaveBeenCalled();
-    expect(sendIMessage).not.toHaveBeenCalled();
+    expect(sendSlack).not.toHaveBeenCalled();
     expect(acquireLock).not.toHaveBeenCalled();
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('DRY RUN'));
     logSpy.mockRestore();

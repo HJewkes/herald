@@ -4,10 +4,20 @@ import { BacklogStore } from "../backlog/store.js";
 import { selectTasks } from "../backlog/prioritizer.js";
 import { checkBudget } from "../budget/tracker.js";
 import { invokeClaudeCode } from "../runner/invoke.js";
-import { sendIMessage, formatSummary } from "../notify/imessage.js";
+import { sendSlack, formatSummary } from "../notify/slack.js";
 import { writeEntry } from "../journal/logger.js";
 import { acquireLock, releaseLock } from "../lockfile.js";
 import type { HeartbeatSummary, JournalEntry } from "../types.js";
+
+async function notify(channel: string | undefined, text: string): Promise<void> {
+  if (!channel) return;
+  try {
+    await sendSlack(channel, text);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`Failed to send Slack notification: ${msg}`);
+  }
+}
 
 export const runCommand = new Command("run")
   .description("Execute one heartbeat cycle")
@@ -27,22 +37,16 @@ export const runCommand = new Command("run")
 
       try {
         const budget = checkBudget(config.budget, config.journalDir);
+        const channel = config.notify.slack.channel;
 
         if (budget.overPace) {
           console.log(
             `Over pace: ${budget.usedTokens.toLocaleString()}/${budget.paceCap.toLocaleString()} tokens (day ${budget.dayOfWeek}/7, ${budget.usedPct}% of weekly limit)`,
           );
-          if (config.notify.imessage.recipient) {
-            try {
-              sendIMessage(
-                config.notify.imessage.recipient,
-                `Herald: Over pace (${budget.usedPct}% used, cap ${budget.paceCapPct}% for day ${budget.dayOfWeek}). Skipping run.`,
-              );
-            } catch (err) {
-              const msg = err instanceof Error ? err.message : String(err);
-              console.error(`Failed to send iMessage notification: ${msg}`);
-            }
-          }
+          await notify(
+            channel,
+            `:pause_button: Over pace (${budget.usedPct}% used, cap ${budget.paceCapPct}% for day ${budget.dayOfWeek}). Skipping run.`,
+          );
           return;
         }
 
@@ -139,14 +143,8 @@ export const runCommand = new Command("run")
           }
         }
 
-        if (config.notify.imessage.recipient) {
-          try {
-            const message = formatSummary(summary);
-            sendIMessage(config.notify.imessage.recipient, message);
-          } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            console.error(`Failed to send iMessage notification: ${msg}`);
-          }
+        if (channel) {
+          await notify(channel, formatSummary(summary));
         }
 
         console.log("Heartbeat complete.");
@@ -158,14 +156,10 @@ export const runCommand = new Command("run")
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`Herald run crashed: ${msg}`);
-      const recipient = config?.notify?.imessage?.recipient;
-      if (recipient) {
-        try {
-          sendIMessage(recipient, `Herald CRASH: ${msg}`);
-        } catch {
-          // Best-effort — don't mask the original error
-        }
-      }
+      await notify(
+        config?.notify?.slack?.channel,
+        `:rotating_light: *Herald CRASH:* ${msg}`,
+      );
       process.exitCode = 1;
     }
   });

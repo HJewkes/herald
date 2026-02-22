@@ -40,8 +40,8 @@ export interface ScheduleConfig {
 }
 
 export interface NotifyConfig {
-  imessage: {
-    recipient: string;
+  slack: {
+    channel: string;
   };
 }
 

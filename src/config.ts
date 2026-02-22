@@ -13,8 +13,8 @@ export const DEFAULT_CONFIG: HeraldConfig = {
     timezone: 'America/Los_Angeles',
   },
   notify: {
-    imessage: {
-      recipient: '',
+    slack: {
+      channel: '',
     },
   },
   backlogDir: 'backlog/active',
@@ -44,8 +44,8 @@ function validateConfig(config: Record<string, unknown>): HeraldConfig {
     throw new Error('Invalid config: notify must be an object');
   }
   const n = notify as Record<string, unknown>;
-  if (typeof n.imessage !== 'object' || n.imessage === null) {
-    throw new Error('Invalid config: notify.imessage must be an object');
+  if (typeof n.slack !== 'object' || n.slack === null) {
+    throw new Error('Invalid config: notify.slack must be an object');
   }
 
   if (typeof config.backlogDir !== 'string') throw new Error('Invalid config: backlogDir must be a string');

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { SlackClient, sendSlack, formatSummary } from '../../src/notify/slack.js';
 import type { HeartbeatSummary } from '../../src/types.js';
 

@@ -9,7 +9,7 @@ export function acquireLock(projectRoot: string): boolean {
   if (existsSync(lockPath)) {
     try {
       const content = readFileSync(lockPath, 'utf-8');
-      const { pid, timestamp } = JSON.parse(content) as { pid: number; timestamp: string };
+      const { pid } = JSON.parse(content) as { pid: number; timestamp: string };
 
       try {
         process.kill(pid, 0);

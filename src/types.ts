@@ -1,6 +1,6 @@
-export type TaskType = 'task' | 'recurring' | 'monitor';
-export type Priority = 'high' | 'medium' | 'low';
-export type TaskStatus = 'pending' | 'in-progress' | 'done' | 'blocked';
+export type TaskType = "task" | "recurring" | "monitor";
+export type Priority = "high" | "medium" | "low";
+export type TaskStatus = "pending" | "in-progress" | "done" | "blocked";
 
 export interface BacklogItem {
   id: string;
@@ -29,9 +29,8 @@ export interface HeraldConfig {
 }
 
 export interface BudgetConfig {
-  monthlyLimitUsd: number;
-  warningThresholdPct: number;
-  hardCapPct: number;
+  weeklyTokenLimit: number;
+  bufferDays: number;
   defaultMaxTokensPerTask: number;
 }
 
@@ -41,24 +40,26 @@ export interface ScheduleConfig {
 }
 
 export interface NotifyConfig {
-  imessage: {
-    recipient: string;
+  slack: {
+    channel: string;
   };
 }
 
 export interface BudgetStatus {
-  usedUsd: number;
-  limitUsd: number;
+  usedTokens: number;
+  paceCap: number;
+  weeklyLimit: number;
+  dayOfWeek: number;
   usedPct: number;
-  overWarning: boolean;
-  overHardCap: boolean;
+  paceCapPct: number;
+  overPace: boolean;
 }
 
 export interface JournalEntry {
   timestamp: string;
   taskId: string;
   taskTitle: string;
-  status: 'success' | 'failure' | 'skipped' | 'budget-blocked';
+  status: "success" | "failure" | "skipped" | "budget-blocked";
   durationMs: number;
   tokensUsed?: number;
   costUsd?: number;
@@ -75,6 +76,11 @@ export interface RunResult {
   needsInput?: string;
 }
 
+export interface BacklogListResult {
+  items: BacklogItem[];
+  warnings: string[];
+}
+
 export interface HeartbeatSummary {
   timestamp: string;
   tasksCompleted: string[];
@@ -82,4 +88,47 @@ export interface HeartbeatSummary {
   tasksBlocked: string[];
   needsInput: string[];
   budget: BudgetStatus;
+}
+
+// Slack integration types
+
+export interface SlackPostResult {
+  ts: string;
+  channel: string;
+}
+
+export interface SlackMessage {
+  ts: string;
+  user: string;
+  text: string;
+  threadTs?: string;
+}
+
+export interface SlackReaction {
+  name: string;
+  users: string[];
+}
+
+export interface SlackFile {
+  id: string;
+  name: string;
+  permalink: string;
+}
+
+export type SlackCommand =
+  | { type: "skip"; taskId: string }
+  | { type: "unblock"; taskId: string }
+  | { type: "pause" }
+  | { type: "resume" }
+  | { type: "priority"; taskId: string; priority: Priority }
+  | { type: "status" }
+  | { type: "list"; status?: TaskStatus; priority?: Priority; tag?: string }
+  | { type: "add"; title: string; priority: Priority; tags: string[] }
+  | { type: "show"; taskId: string }
+  | { type: "help" };
+
+export interface SlackState {
+  lastCheckedTs: string;
+  pauseRequested: boolean;
+  messageMap: Record<string, string>;
 }

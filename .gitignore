@@ -3,3 +3,5 @@ dist/
 *.tsbuildinfo
 journal/*.json
 herald.config.json
+.env
+.herald-slack-state.json

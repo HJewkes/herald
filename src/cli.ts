@@ -32,9 +32,10 @@ import { channelCommand } from "./commands/channel.js";
 
 // Load .env from project root (passed via --project-root) or cwd
 const projectRootIdx = process.argv.indexOf("--project-root");
-const projectRoot = projectRootIdx !== -1 && process.argv[projectRootIdx + 1]
-  ? process.argv[projectRootIdx + 1]
-  : process.cwd();
+const projectRoot =
+  projectRootIdx !== -1 && process.argv[projectRootIdx + 1]
+    ? process.argv[projectRootIdx + 1]
+    : process.cwd();
 loadEnv(projectRoot);
 
 const program = new Command()

@@ -7,7 +7,11 @@ import { invokeClaudeCode } from "../runner/invoke.js";
 import { SlackClient, formatSummary } from "../notify/slack.js";
 import { writeEntry } from "../journal/logger.js";
 import { acquireLock, releaseLock } from "../lockfile.js";
-import { loadSlackState, saveSlackState, trackMessage } from "../slack/state.js";
+import {
+  loadSlackState,
+  saveSlackState,
+  trackMessage,
+} from "../slack/state.js";
 import { parseCommand, executeCommands } from "../slack/commands.js";
 import type {
   BacklogItem,
@@ -73,15 +77,15 @@ export async function processReactions(
       const reactions = await client.getReactions(channel, ts);
       const names = new Set(reactions.map((r) => r.name));
 
-      if (names.has('+1') || names.has('thumbsup')) {
+      if (names.has("+1") || names.has("thumbsup")) {
         const { items } = store.list();
         const item = items.find((i) => i.id === taskId);
-        if (item?.status === 'blocked') {
-          store.updateStatus(item.filePath, 'pending');
+        if (item?.status === "blocked") {
+          store.updateStatus(item.filePath, "pending");
         }
       }
 
-      if (names.has('pause_button') || names.has('double_vertical_bar')) {
+      if (names.has("pause_button") || names.has("double_vertical_bar")) {
         state.pauseRequested = true;
       }
     } catch (err) {
@@ -99,8 +103,8 @@ export async function postRunProgress(
   runMessageTs: string,
   state: SlackState,
 ): Promise<void> {
-  const icon = result.success ? ':white_check_mark:' : ':x:';
-  const status = result.success ? 'completed' : 'failed';
+  const icon = result.success ? ":white_check_mark:" : ":x:";
+  const status = result.success ? "completed" : "failed";
   const text = `${icon} *${task.title}* — ${status}`;
 
   try {
@@ -108,7 +112,12 @@ export async function postRunProgress(
     trackMessage(state, task.id, reply.ts);
 
     if (result.output.length > 500) {
-      await client.uploadFile(channel, result.output, `${task.id}-output.txt`, runMessageTs);
+      await client.uploadFile(
+        channel,
+        result.output,
+        `${task.id}-output.txt`,
+        runMessageTs,
+      );
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -123,7 +132,7 @@ async function handleSlackInbound(
   state: SlackState,
   backlogDir: string,
 ): Promise<void> {
-  let botUserId = '';
+  let botUserId = "";
   if (client) {
     try {
       const auth = await client.authTest();
@@ -137,7 +146,12 @@ async function handleSlackInbound(
   if (client && channel) {
     try {
       const responses = await processInboundCommands(
-        client, channel, backlogStore, state, botUserId, backlogDir,
+        client,
+        channel,
+        backlogStore,
+        state,
+        botUserId,
+        backlogDir,
       );
       for (const r of responses) {
         await tryNotify(client, channel, r);
@@ -229,11 +243,17 @@ export const runCommand = new Command("run")
       const state = loadSlackState(opts.projectRoot);
       const backlogStore = new BacklogStore(config.backlogDir);
 
-      await handleSlackInbound(client, channel, backlogStore, state, config.backlogDir);
+      await handleSlackInbound(
+        client,
+        channel,
+        backlogStore,
+        state,
+        config.backlogDir,
+      );
 
       if (state.pauseRequested) {
         console.log("Herald is paused. Send 'resume' in Slack to continue.");
-        await tryNotify(client, channel, ':pause_button: Herald is paused.');
+        await tryNotify(client, channel, ":pause_button: Herald is paused.");
         saveSlackState(opts.projectRoot, state);
         return;
       }
@@ -264,7 +284,8 @@ export const runCommand = new Command("run")
           return;
         }
 
-        const { items: allItems, warnings: backlogWarnings } = backlogStore.list();
+        const { items: allItems, warnings: backlogWarnings } =
+          backlogStore.list();
         for (const w of backlogWarnings) {
           console.error(w);
         }
@@ -311,10 +332,10 @@ export const runCommand = new Command("run")
           return;
         }
 
-        let runMessageTs = '';
+        let runMessageTs = "";
         if (client && channel && selected.length > 0) {
           try {
-            const taskList = selected.map((t) => `• ${t.title}`).join('\n');
+            const taskList = selected.map((t) => `• ${t.title}`).join("\n");
             const startMsg = `:robot_face: *Herald starting run*\n${taskList}`;
             const posted = await client.postMessage(channel, startMsg);
             runMessageTs = posted.ts;
@@ -325,13 +346,23 @@ export const runCommand = new Command("run")
         }
 
         await executeTaskLoop(
-          selected, backlogStore, config, summary,
-          client, channel, runMessageTs, state,
+          selected,
+          backlogStore,
+          config,
+          summary,
+          client,
+          channel,
+          runMessageTs,
+          state,
         );
 
         if (client && channel && runMessageTs) {
           try {
-            await client.updateMessage(channel, runMessageTs, formatSummary(summary));
+            await client.updateMessage(
+              channel,
+              runMessageTs,
+              formatSummary(summary),
+            );
           } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             console.error(`Failed to update run message: ${msg}`);

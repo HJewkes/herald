@@ -1,6 +1,6 @@
-export type TaskType = 'task' | 'recurring' | 'monitor';
-export type Priority = 'high' | 'medium' | 'low';
-export type TaskStatus = 'pending' | 'in-progress' | 'done' | 'blocked';
+export type TaskType = "task" | "recurring" | "monitor";
+export type Priority = "high" | "medium" | "low";
+export type TaskStatus = "pending" | "in-progress" | "done" | "blocked";
 
 export interface BacklogItem {
   id: string;
@@ -59,7 +59,7 @@ export interface JournalEntry {
   timestamp: string;
   taskId: string;
   taskTitle: string;
-  status: 'success' | 'failure' | 'skipped' | 'budget-blocked';
+  status: "success" | "failure" | "skipped" | "budget-blocked";
   durationMs: number;
   tokensUsed?: number;
   costUsd?: number;
@@ -116,16 +116,16 @@ export interface SlackFile {
 }
 
 export type SlackCommand =
-  | { type: 'skip'; taskId: string }
-  | { type: 'unblock'; taskId: string }
-  | { type: 'pause' }
-  | { type: 'resume' }
-  | { type: 'priority'; taskId: string; priority: Priority }
-  | { type: 'status' }
-  | { type: 'list'; status?: TaskStatus; priority?: Priority; tag?: string }
-  | { type: 'add'; title: string; priority: Priority; tags: string[] }
-  | { type: 'show'; taskId: string }
-  | { type: 'help' };
+  | { type: "skip"; taskId: string }
+  | { type: "unblock"; taskId: string }
+  | { type: "pause" }
+  | { type: "resume" }
+  | { type: "priority"; taskId: string; priority: Priority }
+  | { type: "status" }
+  | { type: "list"; status?: TaskStatus; priority?: Priority; tag?: string }
+  | { type: "add"; title: string; priority: Priority; tags: string[] }
+  | { type: "show"; taskId: string }
+  | { type: "help" };
 
 export interface SlackState {
   lastCheckedTs: string;

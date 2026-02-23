@@ -1,4 +1,4 @@
-import type { RunResult } from '../types.js';
+import type { RunResult } from "../types.js";
 
 interface ClaudeOutput {
   result?: string;
@@ -11,7 +11,9 @@ export function parseOutput(raw: string, taskId: string): RunResult {
   try {
     const data = JSON.parse(raw) as ClaudeOutput;
     const output = data.result ?? raw;
-    const needsInputMatch = output.match(/(?:NEEDS INPUT|QUESTION|BLOCKED):\s*(.+)/i);
+    const needsInputMatch = output.match(
+      /(?:NEEDS INPUT|QUESTION|BLOCKED):\s*(.+)/i,
+    );
 
     return {
       taskId,

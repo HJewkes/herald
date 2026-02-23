@@ -1,5 +1,5 @@
-import { readEntries } from '../journal/logger.js';
-import type { BudgetConfig, BudgetStatus } from '../types.js';
+import { readEntries } from "../journal/logger.js";
+import type { BudgetConfig, BudgetStatus } from "../types.js";
 
 export function getWeekStart(now: Date): Date {
   const d = new Date(now);
@@ -28,13 +28,19 @@ export function computeBudgetStatus(
   dayOfWeek: number,
   config: BudgetConfig,
 ): BudgetStatus {
-  const paceCap = computePaceCap(dayOfWeek, config.bufferDays, config.weeklyTokenLimit);
-  const usedPct = config.weeklyTokenLimit > 0
-    ? Math.round((usedTokens / config.weeklyTokenLimit) * 100)
-    : 0;
-  const paceCapPct = config.weeklyTokenLimit > 0
-    ? Math.round((paceCap / config.weeklyTokenLimit) * 100)
-    : 0;
+  const paceCap = computePaceCap(
+    dayOfWeek,
+    config.bufferDays,
+    config.weeklyTokenLimit,
+  );
+  const usedPct =
+    config.weeklyTokenLimit > 0
+      ? Math.round((usedTokens / config.weeklyTokenLimit) * 100)
+      : 0;
+  const paceCapPct =
+    config.weeklyTokenLimit > 0
+      ? Math.round((paceCap / config.weeklyTokenLimit) * 100)
+      : 0;
 
   return {
     usedTokens,

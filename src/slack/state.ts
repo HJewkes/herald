@@ -1,11 +1,11 @@
-import { readFileSync, writeFileSync, renameSync } from 'node:fs';
-import { join } from 'node:path';
-import type { SlackState } from '../types.js';
+import { readFileSync, writeFileSync, renameSync } from "node:fs";
+import { join } from "node:path";
+import type { SlackState } from "../types.js";
 
-const STATE_FILE = '.herald-slack-state.json';
+const STATE_FILE = ".herald-slack-state.json";
 
 const DEFAULT_STATE: SlackState = {
-  lastCheckedTs: '0',
+  lastCheckedTs: "0",
   pauseRequested: false,
   messageMap: {},
 };
@@ -13,7 +13,7 @@ const DEFAULT_STATE: SlackState = {
 export function loadSlackState(projectRoot: string): SlackState {
   const filePath = join(projectRoot, STATE_FILE);
   try {
-    const raw = readFileSync(filePath, 'utf-8');
+    const raw = readFileSync(filePath, "utf-8");
     return { ...DEFAULT_STATE, ...JSON.parse(raw) } as SlackState;
   } catch {
     return { ...DEFAULT_STATE };
@@ -27,6 +27,10 @@ export function saveSlackState(projectRoot: string, state: SlackState): void {
   renameSync(tmpPath, filePath);
 }
 
-export function trackMessage(state: SlackState, taskId: string, ts: string): void {
+export function trackMessage(
+  state: SlackState,
+  taskId: string,
+  ts: string,
+): void {
   state.messageMap[taskId] = ts;
 }

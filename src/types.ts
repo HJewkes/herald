@@ -121,7 +121,11 @@ export type SlackCommand =
   | { type: 'pause' }
   | { type: 'resume' }
   | { type: 'priority'; taskId: string; priority: Priority }
-  | { type: 'status' };
+  | { type: 'status' }
+  | { type: 'list'; status?: TaskStatus; priority?: Priority; tag?: string }
+  | { type: 'add'; title: string; priority: Priority; tags: string[] }
+  | { type: 'show'; taskId: string }
+  | { type: 'help' };
 
 export interface SlackState {
   lastCheckedTs: string;

@@ -412,6 +412,7 @@ describe('processInboundCommands', () => {
       {} as never,
       state,
       'U_BOT',
+      '/fake/backlog',
     );
 
     expect(responses).toEqual([':clipboard: status response']);
@@ -425,7 +426,7 @@ describe('processInboundCommands', () => {
     const client = { getHistory: vi.fn().mockResolvedValue([]) };
     const state: SlackState = { lastCheckedTs: '5.0', pauseRequested: false, messageMap: {} };
 
-    await processInboundCommands(client as never, 'C123', {} as never, state, 'U_BOT');
+    await processInboundCommands(client as never, 'C123', {} as never, state, 'U_BOT', '/fake/backlog');
 
     expect(state.lastCheckedTs).toBe('5.0');
   });

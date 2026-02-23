@@ -45,6 +45,7 @@ export async function processInboundCommands(
   store: BacklogStore,
   state: SlackState,
   botUserId: string,
+  backlogDir: string,
 ): Promise<string[]> {
   const messages = await client.getHistory(channel, state.lastCheckedTs);
 
@@ -58,7 +59,7 @@ export async function processInboundCommands(
     .map((m) => parseCommand(m.text))
     .filter((c): c is NonNullable<typeof c> => c !== null);
 
-  return executeCommands(commands, store, state);
+  return executeCommands(commands, store, state, backlogDir);
 }
 
 export async function processReactions(
@@ -120,6 +121,7 @@ async function handleSlackInbound(
   channel: string,
   backlogStore: BacklogStore,
   state: SlackState,
+  backlogDir: string,
 ): Promise<void> {
   let botUserId = '';
   if (client) {
@@ -135,7 +137,7 @@ async function handleSlackInbound(
   if (client && channel) {
     try {
       const responses = await processInboundCommands(
-        client, channel, backlogStore, state, botUserId,
+        client, channel, backlogStore, state, botUserId, backlogDir,
       );
       for (const r of responses) {
         await tryNotify(client, channel, r);
@@ -227,7 +229,7 @@ export const runCommand = new Command("run")
       const state = loadSlackState(opts.projectRoot);
       const backlogStore = new BacklogStore(config.backlogDir);
 
-      await handleSlackInbound(client, channel, backlogStore, state);
+      await handleSlackInbound(client, channel, backlogStore, state, config.backlogDir);
 
       if (state.pauseRequested) {
         console.log("Herald is paused. Send 'resume' in Slack to continue.");

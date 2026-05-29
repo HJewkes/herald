@@ -1,12 +1,12 @@
 import { Command } from "@commander-js/extra-typings";
-import { loadConfig } from "../config.js";
+import { loadConfig } from "../core/config.js";
 import { BacklogStore } from "../backlog/store.js";
 import { selectTasks } from "../backlog/prioritizer.js";
-import { checkBudget } from "../budget/tracker.js";
-import { invokeClaudeCode } from "../runner/invoke.js";
-import { SlackClient, formatSummary } from "../notify/slack.js";
-import { writeEntry } from "../journal/logger.js";
-import { acquireLock, releaseLock } from "../lockfile.js";
+import { checkBudget } from "../core/budget.js";
+import { invokeClaudeCode } from "../drivers/sdk/invoke.js";
+import { SlackClient, formatSummary } from "../transports/slack.js";
+import { writeEntry } from "../core/journal.js";
+import { acquireLock, releaseLock } from "../core/lockfile.js";
 import {
   loadSlackState,
   saveSlackState,

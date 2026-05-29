@@ -6,7 +6,7 @@ import type {
   SlackState,
 } from "../../src/types.js";
 
-vi.mock("../../src/config.js", () => ({
+vi.mock("../../src/core/config.js", () => ({
   loadConfig: vi.fn(),
 }));
 
@@ -18,24 +18,24 @@ vi.mock("../../src/backlog/prioritizer.js", () => ({
   selectTasks: vi.fn(),
 }));
 
-vi.mock("../../src/budget/tracker.js", () => ({
+vi.mock("../../src/core/budget.js", () => ({
   checkBudget: vi.fn(),
 }));
 
-vi.mock("../../src/runner/invoke.js", () => ({
+vi.mock("../../src/drivers/sdk/invoke.js", () => ({
   invokeClaudeCode: vi.fn(),
 }));
 
-vi.mock("../../src/notify/slack.js", () => ({
+vi.mock("../../src/transports/slack.js", () => ({
   SlackClient: vi.fn(),
   formatSummary: vi.fn(),
 }));
 
-vi.mock("../../src/journal/logger.js", () => ({
+vi.mock("../../src/core/journal.js", () => ({
   writeEntry: vi.fn(),
 }));
 
-vi.mock("../../src/lockfile.js", () => ({
+vi.mock("../../src/core/lockfile.js", () => ({
   acquireLock: vi.fn(),
   releaseLock: vi.fn(),
 }));
@@ -51,14 +51,14 @@ vi.mock("../../src/slack/commands.js", () => ({
   executeCommands: vi.fn().mockReturnValue([]),
 }));
 
-import { loadConfig } from "../../src/config.js";
+import { loadConfig } from "../../src/core/config.js";
 import { BacklogStore } from "../../src/backlog/store.js";
 import { selectTasks } from "../../src/backlog/prioritizer.js";
-import { checkBudget } from "../../src/budget/tracker.js";
-import { invokeClaudeCode } from "../../src/runner/invoke.js";
-import { SlackClient, formatSummary } from "../../src/notify/slack.js";
-import { writeEntry } from "../../src/journal/logger.js";
-import { acquireLock, releaseLock } from "../../src/lockfile.js";
+import { checkBudget } from "../../src/core/budget.js";
+import { invokeClaudeCode } from "../../src/drivers/sdk/invoke.js";
+import { SlackClient, formatSummary } from "../../src/transports/slack.js";
+import { writeEntry } from "../../src/core/journal.js";
+import { acquireLock, releaseLock } from "../../src/core/lockfile.js";
 import { loadSlackState, saveSlackState } from "../../src/slack/state.js";
 import { executeCommands } from "../../src/slack/commands.js";
 

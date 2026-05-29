@@ -1,10 +1,10 @@
 import { Command } from "@commander-js/extra-typings";
-import { loadConfig } from "../config.js";
+import { loadConfig } from "../core/config.js";
 import {
   installSchedule,
   uninstallSchedule,
   getScheduleStatus,
-} from "../scheduler.js";
+} from "../core/scheduler.js";
 
 export const scheduleCommand = new Command("schedule").description(
   "Manage launchd schedule",

@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../../src/notify/slack.js", () => ({
+vi.mock("../../src/transports/slack.js", () => ({
   SlackClient: vi.fn(),
 }));
 
-import { SlackClient } from "../../src/notify/slack.js";
+import { SlackClient } from "../../src/transports/slack.js";
 
 const mockClient = {
   createChannel: vi.fn(),

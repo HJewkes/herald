@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { formatSummary, sendIMessage } from "../../src/notify/imessage.js";
+import { formatSummary, sendIMessage } from "../../src/transports/imessage.js";
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import type { HeartbeatSummary } from "../../src/types.js";

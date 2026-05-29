@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
-import { loadConfig } from "../config.js";
-import { checkBudget } from "../budget/tracker.js";
+import { loadConfig } from "../core/config.js";
+import { checkBudget } from "../core/budget.js";
 
 export const budgetCommand = new Command("budget")
   .description("Show current usage vs pace cap")

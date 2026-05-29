@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { buildPrompt } from "../../src/runner/prompts.js";
-import { parseOutput } from "../../src/runner/output.js";
-import { invokeClaudeCode } from "../../src/runner/invoke.js";
+import { buildPrompt } from "../../../src/drivers/sdk/prompts.js";
+import { parseOutput } from "../../../src/drivers/sdk/output.js";
+import { invokeClaudeCode } from "../../../src/drivers/sdk/invoke.js";
 import { execFileSync } from "node:child_process";
-import type { BacklogItem } from "../../src/types.js";
+import type { BacklogItem } from "../../../src/types.js";
 
 vi.mock("node:child_process", () => ({
   execFileSync: vi.fn(),

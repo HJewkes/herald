@@ -1,4 +1,4 @@
-import type { BacklogItem } from "../types.js";
+import type { BacklogItem } from "../../types.js";
 
 export function buildPrompt(item: BacklogItem): string {
   const lines = [

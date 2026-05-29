@@ -1,5 +1,5 @@
 import { Command } from "@commander-js/extra-typings";
-import { loadConfig } from "../config.js";
+import { loadConfig } from "../core/config.js";
 
 export const configCommand = new Command("config")
   .description("Show configuration")

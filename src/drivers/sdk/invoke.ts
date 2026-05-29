@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import type { BacklogItem, RunResult } from "../types.js";
+import type { BacklogItem, RunResult } from "../../types.js";
 import { buildPrompt } from "./prompts.js";
 import { parseOutput } from "./output.js";
 

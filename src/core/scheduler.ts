@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { writeFileSync, existsSync, unlinkSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
-import type { ScheduleConfig } from "./types.js";
+import type { ScheduleConfig } from "../types.js";
 
 const PLIST_LABEL = "com.herald.scheduler";
 const PLIST_PATH = join(

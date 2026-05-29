@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
-import { loadConfig } from "../config.js";
-import { sendSlack } from "../notify/slack.js";
+import { loadConfig } from "../core/config.js";
+import { sendSlack } from "../transports/slack.js";
 
 export const notifyCommand = new Command("notify").description(
   "Notification management",

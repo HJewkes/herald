@@ -1,4 +1,4 @@
-import { readEntries } from "../journal/logger.js";
+import { readEntries } from "./journal.js";
 import type { BudgetConfig, BudgetStatus } from "../types.js";
 
 export function getWeekStart(now: Date): Date {

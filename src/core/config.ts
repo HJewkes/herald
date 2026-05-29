@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { HeraldConfig } from "./types.js";
+import type { HeraldConfig } from "../types.js";
 
 export const DEFAULT_CONFIG: HeraldConfig = {
   budget: {

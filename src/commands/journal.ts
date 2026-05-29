@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
-import { loadConfig } from "../config.js";
-import { readEntries } from "../journal/logger.js";
+import { loadConfig } from "../core/config.js";
+import { readEntries } from "../core/journal.js";
 
 export const journalCommand = new Command("journal")
   .description("Show recent run history")

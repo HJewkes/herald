@@ -3,7 +3,7 @@ import {
   SlackClient,
   sendSlack,
   formatSummary,
-} from "../../src/notify/slack.js";
+} from "../../src/transports/slack.js";
 import type { HeartbeatSummary } from "../../src/types.js";
 
 function mockFetch(data: Record<string, unknown>) {

@@ -1,5 +1,5 @@
 import { Command } from "@commander-js/extra-typings";
-import { SlackClient } from "../notify/slack.js";
+import { SlackClient } from "../transports/slack.js";
 
 export const channelCommand = new Command("channel").description(
   "Manage Herald Slack channels",

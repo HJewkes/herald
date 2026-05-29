@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { loadConfig, DEFAULT_CONFIG } from "../src/config.js";
+import { loadConfig, DEFAULT_CONFIG } from "../../src/core/config.js";
 import { readFileSync } from "node:fs";
 
 vi.mock("node:fs", () => ({

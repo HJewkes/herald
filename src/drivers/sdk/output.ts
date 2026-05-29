@@ -1,4 +1,4 @@
-import type { RunResult } from "../types.js";
+import type { RunResult } from "../../types.js";
 
 interface ClaudeOutput {
   result?: string;

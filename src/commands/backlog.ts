@@ -1,5 +1,5 @@
 import { Command } from "@commander-js/extra-typings";
-import { loadConfig } from "../config.js";
+import { loadConfig } from "../core/config.js";
 import { BacklogStore } from "../backlog/store.js";
 
 export const backlogCommand = new Command("backlog").description(

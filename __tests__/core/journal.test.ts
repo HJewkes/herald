@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { writeEntry, readEntries } from "../../src/journal/logger.js";
+import { writeEntry, readEntries } from "../../src/core/journal.js";
 import {
   writeFileSync,
   readdirSync,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { acquireLock, releaseLock } from "../src/lockfile.js";
+import { acquireLock, releaseLock } from "../../src/core/lockfile.js";
 import { writeFileSync, readFileSync, unlinkSync, existsSync } from "node:fs";
 
 vi.mock("node:fs", () => ({

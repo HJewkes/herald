@@ -5,14 +5,14 @@ import {
   getWeekStart,
   getDayOfWeek,
   computePaceCap,
-} from "../../src/budget/tracker.js";
+} from "../../src/core/budget.js";
 import type { BudgetConfig } from "../../src/types.js";
 
-vi.mock("../../src/journal/logger.js", () => ({
+vi.mock("../../src/core/journal.js", () => ({
   readEntries: vi.fn(),
 }));
 
-import { readEntries } from "../../src/journal/logger.js";
+import { readEntries } from "../../src/core/journal.js";
 
 const config: BudgetConfig = {
   weeklyTokenLimit: 5000000,

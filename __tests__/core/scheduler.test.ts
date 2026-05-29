@@ -5,10 +5,10 @@ import {
   installSchedule,
   uninstallSchedule,
   getScheduleStatus,
-} from "../src/scheduler.js";
+} from "../../src/core/scheduler.js";
 import { execFileSync } from "node:child_process";
 import { writeFileSync, existsSync, unlinkSync } from "node:fs";
-import type { ScheduleConfig } from "../src/types.js";
+import type { ScheduleConfig } from "../../src/types.js";
 
 vi.mock("node:child_process", () => ({
   execFileSync: vi.fn(),

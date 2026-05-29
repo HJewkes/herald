@@ -3,9 +3,9 @@ import {
   loadSlackState,
   saveSlackState,
   trackMessage,
-} from "../../src/slack/state.js";
+} from "../../../src/plugins/backlog/state.js";
 import { readFileSync, writeFileSync, renameSync } from "node:fs";
-import type { SlackState } from "../../src/types.js";
+import type { SlackState } from "../../../src/plugins/backlog/types.js";
 
 vi.mock("node:fs", () => ({
   readFileSync: vi.fn(),

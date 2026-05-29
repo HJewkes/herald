@@ -12,7 +12,7 @@ import type {
   BacklogListResult,
   Priority,
   TaskStatus,
-} from "../types.js";
+} from "./types.js";
 import { parseBacklogItem } from "./parser.js";
 
 export function generateTaskId(dir: string, date: Date): string {

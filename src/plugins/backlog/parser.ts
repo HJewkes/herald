@@ -1,5 +1,5 @@
 import matter from "gray-matter";
-import type { BacklogItem, TaskType, Priority, TaskStatus } from "../types.js";
+import type { BacklogItem, TaskType, Priority, TaskStatus } from "./types.js";
 
 const VALID_TASK_TYPES = new Set<string>(["task", "recurring", "monitor"]);
 const VALID_PRIORITIES = new Set<string>(["high", "medium", "low"]);

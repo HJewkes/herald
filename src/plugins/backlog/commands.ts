@@ -4,8 +4,8 @@ import type {
   SlackCommand,
   SlackState,
   TaskStatus,
-} from "../types.js";
-import { BacklogStore, generateTaskId } from "../backlog/store.js";
+} from "./types.js";
+import { BacklogStore, generateTaskId } from "./store.js";
 
 const PRIORITY_VALUES: Priority[] = ["high", "medium", "low"];
 const STATUS_VALUES: TaskStatus[] = [

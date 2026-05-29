@@ -1,20 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { BudgetStatus, HeraldConfig } from "../../src/types.js";
 import type {
   BacklogItem,
-  BudgetStatus,
-  HeraldConfig,
   SlackState,
-} from "../../src/types.js";
+} from "../../src/plugins/backlog/types.js";
 
 vi.mock("../../src/core/config.js", () => ({
   loadConfig: vi.fn(),
 }));
 
-vi.mock("../../src/backlog/store.js", () => ({
+vi.mock("../../src/plugins/backlog/store.js", () => ({
   BacklogStore: vi.fn(),
 }));
 
-vi.mock("../../src/backlog/prioritizer.js", () => ({
+vi.mock("../../src/plugins/backlog/prioritizer.js", () => ({
   selectTasks: vi.fn(),
 }));
 
@@ -28,7 +27,10 @@ vi.mock("../../src/drivers/sdk/invoke.js", () => ({
 
 vi.mock("../../src/transports/slack.js", () => ({
   SlackClient: vi.fn(),
-  formatSummary: vi.fn(),
+}));
+
+vi.mock("../../src/plugins/backlog/report.js", () => ({
+  formatSlackSummary: vi.fn(),
 }));
 
 vi.mock("../../src/core/journal.js", () => ({
@@ -40,27 +42,31 @@ vi.mock("../../src/core/lockfile.js", () => ({
   releaseLock: vi.fn(),
 }));
 
-vi.mock("../../src/slack/state.js", () => ({
+vi.mock("../../src/plugins/backlog/state.js", () => ({
   loadSlackState: vi.fn(),
   saveSlackState: vi.fn(),
   trackMessage: vi.fn(),
 }));
 
-vi.mock("../../src/slack/commands.js", () => ({
+vi.mock("../../src/plugins/backlog/commands.js", () => ({
   parseCommand: vi.fn(),
   executeCommands: vi.fn().mockReturnValue([]),
 }));
 
 import { loadConfig } from "../../src/core/config.js";
-import { BacklogStore } from "../../src/backlog/store.js";
-import { selectTasks } from "../../src/backlog/prioritizer.js";
+import { BacklogStore } from "../../src/plugins/backlog/store.js";
+import { selectTasks } from "../../src/plugins/backlog/prioritizer.js";
 import { checkBudget } from "../../src/core/budget.js";
 import { invokeClaudeCode } from "../../src/drivers/sdk/invoke.js";
-import { SlackClient, formatSummary } from "../../src/transports/slack.js";
+import { SlackClient } from "../../src/transports/slack.js";
+import { formatSlackSummary } from "../../src/plugins/backlog/report.js";
 import { writeEntry } from "../../src/core/journal.js";
 import { acquireLock, releaseLock } from "../../src/core/lockfile.js";
-import { loadSlackState, saveSlackState } from "../../src/slack/state.js";
-import { executeCommands } from "../../src/slack/commands.js";
+import {
+  loadSlackState,
+  saveSlackState,
+} from "../../src/plugins/backlog/state.js";
+import { executeCommands } from "../../src/plugins/backlog/commands.js";
 
 function makeConfig(overrides: Partial<HeraldConfig> = {}): HeraldConfig {
   return {
@@ -71,7 +77,6 @@ function makeConfig(overrides: Partial<HeraldConfig> = {}): HeraldConfig {
     },
     schedule: { times: ["09:00"], timezone: "America/Denver" },
     notify: { slack: { channel: "#herald" } },
-    backlogDir: "/fake/backlog",
     journalDir: "/fake/journal",
     ...overrides,
   };
@@ -178,7 +183,7 @@ describe("run command", () => {
     );
     mockStore.list.mockReturnValue({ items: [], warnings: [] });
     vi.mocked(selectTasks).mockReturnValue([]);
-    vi.mocked(formatSummary).mockReturnValue("Summary message");
+    vi.mocked(formatSlackSummary).mockReturnValue("Summary message");
     vi.mocked(loadSlackState).mockReturnValue({ ...defaultState });
     vi.mocked(executeCommands).mockReturnValue([]);
   });
@@ -425,8 +430,10 @@ describe("processInboundCommands", () => {
 
   it("filters out bot messages and processes user commands", async () => {
     vi.resetModules();
-    const { parseCommand } = await import("../../src/slack/commands.js");
-    const { executeCommands } = await import("../../src/slack/commands.js");
+    const { parseCommand } =
+      await import("../../src/plugins/backlog/commands.js");
+    const { executeCommands } =
+      await import("../../src/plugins/backlog/commands.js");
     const { processInboundCommands } =
       await import("../../src/commands/run.js");
 

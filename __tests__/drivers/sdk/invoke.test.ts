@@ -1,28 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { buildPrompt } from "../../../src/drivers/sdk/prompts.js";
+import {
+  buildPrompt,
+  type SdkRunInput,
+} from "../../../src/drivers/sdk/prompts.js";
 import { parseOutput } from "../../../src/drivers/sdk/output.js";
 import { invokeClaudeCode } from "../../../src/drivers/sdk/invoke.js";
 import { execFileSync } from "node:child_process";
-import type { BacklogItem } from "../../../src/types.js";
 
 vi.mock("node:child_process", () => ({
   execFileSync: vi.fn(),
 }));
 
-function makeItem(overrides: Partial<BacklogItem> = {}): BacklogItem {
+function makeItem(overrides: Partial<SdkRunInput> = {}): SdkRunInput {
   return {
     id: "test-001",
-    type: "task",
-    priority: "medium",
-    status: "pending",
     allowedTools: ["Read", "Write"],
-    maxTokens: 50000,
-    tags: [],
-    created: "2026-02-20",
-    lastRun: null,
     title: "Fix the bug",
     body: "## Context\nThere is a bug.\n\n## Acceptance Criteria\n- [ ] Bug is fixed",
-    filePath: "/fake/task.md",
     project: "~/Documents/projects/test",
     ...overrides,
   };

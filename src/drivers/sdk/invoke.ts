@@ -1,10 +1,10 @@
 import { execFileSync } from "node:child_process";
-import type { BacklogItem, RunResult } from "../../types.js";
-import { buildPrompt } from "./prompts.js";
+import type { RunResult } from "../../types.js";
+import { buildPrompt, type SdkRunInput } from "./prompts.js";
 import { parseOutput } from "./output.js";
 
 export function invokeClaudeCode(
-  item: BacklogItem,
+  item: SdkRunInput,
   maxTurns: number,
 ): RunResult {
   const prompt = buildPrompt(item);

@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, renameSync } from "node:fs";
 import { join } from "node:path";
-import type { SlackState } from "../types.js";
+import type { SlackState } from "./types.js";
 
 const STATE_FILE = ".herald-slack-state.json";
 

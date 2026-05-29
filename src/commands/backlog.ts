@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
-import { loadConfig } from "../core/config.js";
-import { BacklogStore } from "../backlog/store.js";
+import { BacklogStore } from "../plugins/backlog/store.js";
+import { resolveBacklogDir } from "../plugins/backlog/config.js";
 
 export const backlogCommand = new Command("backlog").description(
   "Manage backlog items",
@@ -11,8 +11,7 @@ backlogCommand
   .description("Show current backlog sorted by priority")
   .option("--project-root <path>", "Herald project root", process.cwd())
   .action((opts) => {
-    const config = loadConfig(opts.projectRoot);
-    const store = new BacklogStore(config.backlogDir);
+    const store = new BacklogStore(resolveBacklogDir(opts.projectRoot));
     const { items, warnings } = store.list();
 
     for (const w of warnings) {

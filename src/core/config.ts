@@ -17,7 +17,6 @@ export const DEFAULT_CONFIG: HeraldConfig = {
       channel: "",
     },
   },
-  backlogDir: "backlog/active",
   journalDir: "journal",
 };
 
@@ -55,8 +54,6 @@ function validateConfig(config: Record<string, unknown>): HeraldConfig {
     throw new Error("Invalid config: notify.slack must be an object");
   }
 
-  if (typeof config.backlogDir !== "string")
-    throw new Error("Invalid config: backlogDir must be a string");
   if (typeof config.journalDir !== "string")
     throw new Error("Invalid config: journalDir must be a string");
 
@@ -82,7 +79,6 @@ export function loadConfig(projectRoot: string): HeraldConfig {
     userConfig,
   );
   const config = validateConfig(merged);
-  config.backlogDir = join(projectRoot, config.backlogDir);
   config.journalDir = join(projectRoot, config.journalDir);
 
   return config;

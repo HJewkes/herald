@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { formatSummary, sendIMessage } from "../../src/transports/imessage.js";
+import { sendIMessage } from "../../src/transports/imessage.js";
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
-import type { HeartbeatSummary } from "../../src/types.js";
 
 vi.mock("node:child_process", () => ({
   execFileSync: vi.fn(),
@@ -12,57 +11,6 @@ vi.mock("node:fs", () => ({
   writeFileSync: vi.fn(),
   unlinkSync: vi.fn(),
 }));
-
-describe("formatSummary", () => {
-  it("formats a heartbeat summary into a readable message", () => {
-    const summary: HeartbeatSummary = {
-      timestamp: "2026-02-20T09:00:00Z",
-      tasksCompleted: ["Fix brain search"],
-      tasksSkipped: ["Add fuzzy matching"],
-      tasksBlocked: [],
-      needsInput: ["Should stale notes auto-archive?"],
-      budget: {
-        usedTokens: 500000,
-        paceCap: 2000000,
-        weeklyLimit: 5000000,
-        dayOfWeek: 3,
-        usedPct: 10,
-        paceCapPct: 40,
-        overPace: false,
-      },
-    };
-
-    const msg = formatSummary(summary);
-    expect(msg).toContain("Herald Report");
-    expect(msg).toContain("Fix brain search");
-    expect(msg).toContain("Add fuzzy matching");
-    expect(msg).toContain("auto-archive");
-    expect(msg).toContain("day 3/7");
-  });
-
-  it("handles empty summary", () => {
-    const summary: HeartbeatSummary = {
-      timestamp: "2026-02-20T09:00:00Z",
-      tasksCompleted: [],
-      tasksSkipped: [],
-      tasksBlocked: [],
-      needsInput: [],
-      budget: {
-        usedTokens: 0,
-        paceCap: 2000000,
-        weeklyLimit: 5000000,
-        dayOfWeek: 3,
-        usedPct: 0,
-        paceCapPct: 40,
-        overPace: false,
-      },
-    };
-
-    const msg = formatSummary(summary);
-    expect(msg).toContain("Herald Report");
-    expect(msg).toContain("No tasks");
-  });
-});
 
 describe("sendIMessage", () => {
   beforeEach(() => {

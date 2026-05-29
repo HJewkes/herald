@@ -1,5 +1,6 @@
 import cronParser from "cron-parser";
-import type { BacklogItem, BudgetStatus, Priority } from "../types.js";
+import type { BacklogItem, Priority } from "./types.js";
+import type { BudgetStatus } from "../../types.js";
 
 const PRIORITY_ORDER: Record<Priority, number> = {
   high: 0,

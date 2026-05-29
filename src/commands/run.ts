@@ -1,25 +1,26 @@
 import { Command } from "@commander-js/extra-typings";
 import { loadConfig } from "../core/config.js";
-import { BacklogStore } from "../backlog/store.js";
-import { selectTasks } from "../backlog/prioritizer.js";
+import { BacklogStore } from "../plugins/backlog/store.js";
+import { selectTasks } from "../plugins/backlog/prioritizer.js";
+import { resolveBacklogDir } from "../plugins/backlog/config.js";
+import { formatSlackSummary } from "../plugins/backlog/report.js";
 import { checkBudget } from "../core/budget.js";
 import { invokeClaudeCode } from "../drivers/sdk/invoke.js";
-import { SlackClient, formatSummary } from "../transports/slack.js";
+import { SlackClient } from "../transports/slack.js";
 import { writeEntry } from "../core/journal.js";
 import { acquireLock, releaseLock } from "../core/lockfile.js";
 import {
   loadSlackState,
   saveSlackState,
   trackMessage,
-} from "../slack/state.js";
-import { parseCommand, executeCommands } from "../slack/commands.js";
+} from "../plugins/backlog/state.js";
+import { parseCommand, executeCommands } from "../plugins/backlog/commands.js";
 import type {
   BacklogItem,
   HeartbeatSummary,
-  JournalEntry,
-  RunResult,
   SlackState,
-} from "../types.js";
+} from "../plugins/backlog/types.js";
+import type { JournalEntry, RunResult } from "../types.js";
 
 function tryCreateClient(): SlackClient | null {
   try {
@@ -241,14 +242,15 @@ export const runCommand = new Command("run")
       client = tryCreateClient();
       const channel = config.notify.slack.channel;
       const state = loadSlackState(opts.projectRoot);
-      const backlogStore = new BacklogStore(config.backlogDir);
+      const backlogDir = resolveBacklogDir(opts.projectRoot);
+      const backlogStore = new BacklogStore(backlogDir);
 
       await handleSlackInbound(
         client,
         channel,
         backlogStore,
         state,
-        config.backlogDir,
+        backlogDir,
       );
 
       if (state.pauseRequested) {
@@ -361,14 +363,14 @@ export const runCommand = new Command("run")
             await client.updateMessage(
               channel,
               runMessageTs,
-              formatSummary(summary),
+              formatSlackSummary(summary),
             );
           } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             console.error(`Failed to update run message: ${msg}`);
           }
         } else if (channel) {
-          await tryNotify(client, channel, formatSummary(summary));
+          await tryNotify(client, channel, formatSlackSummary(summary));
         }
 
         saveSlackState(opts.projectRoot, state);

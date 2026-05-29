@@ -19,7 +19,6 @@ describe("loadConfig", () => {
     const config = loadConfig("/fake/project");
     expect(config).toEqual({
       ...DEFAULT_CONFIG,
-      backlogDir: "/fake/project/backlog/active",
       journalDir: "/fake/project/journal",
     });
   });
@@ -34,10 +33,9 @@ describe("loadConfig", () => {
     expect(config.budget.bufferDays).toBe(DEFAULT_CONFIG.budget.bufferDays);
   });
 
-  it("resolves backlogDir and journalDir relative to project root", () => {
+  it("resolves journalDir relative to project root", () => {
     vi.mocked(existsSync).mockReturnValue(false);
     const config = loadConfig("/my/project");
-    expect(config.backlogDir).toBe("/my/project/backlog/active");
     expect(config.journalDir).toBe("/my/project/journal");
   });
 

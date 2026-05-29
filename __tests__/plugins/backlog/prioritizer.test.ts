@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { selectTasks, isRecurringDue } from "../../src/backlog/prioritizer.js";
-import type { BacklogItem, BudgetStatus } from "../../src/types.js";
+import {
+  selectTasks,
+  isRecurringDue,
+} from "../../../src/plugins/backlog/prioritizer.js";
+import type { BacklogItem } from "../../../src/plugins/backlog/types.js";
+import type { BudgetStatus } from "../../../src/types.js";
 
 function makeItem(overrides: Partial<BacklogItem>): BacklogItem {
   return {

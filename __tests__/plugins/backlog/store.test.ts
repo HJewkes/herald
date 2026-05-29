@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { BacklogStore, generateTaskId } from "../../src/backlog/store.js";
+import {
+  BacklogStore,
+  generateTaskId,
+} from "../../../src/plugins/backlog/store.js";
 import {
   existsSync,
   mkdirSync,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseBacklogItem } from "../../src/backlog/parser.js";
+import { parseBacklogItem } from "../../../src/plugins/backlog/parser.js";
 
 const VALID_ITEM = `---
 id: 2026-02-20-001

@@ -1,8 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { parseCommand, executeCommands } from "../../src/slack/commands.js";
-import type { SlackCommand, SlackState, BacklogItem } from "../../src/types.js";
+import {
+  parseCommand,
+  executeCommands,
+} from "../../../src/plugins/backlog/commands.js";
+import type {
+  SlackCommand,
+  SlackState,
+  BacklogItem,
+} from "../../../src/plugins/backlog/types.js";
 
-vi.mock("../../src/backlog/store.js", () => ({
+vi.mock("../../../src/plugins/backlog/store.js", () => ({
   BacklogStore: vi.fn(),
   generateTaskId: vi.fn().mockReturnValue("2026-02-22-001"),
 }));

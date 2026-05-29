@@ -1,6 +1,18 @@
-import type { BacklogItem } from "../../types.js";
+/**
+ * Structural shape the SDK driver needs to run a unit of work. Any caller
+ * whose work-item has these fields (e.g. the backlog plugin's BacklogItem)
+ * satisfies it — no import coupling to any plugin. The formal brain contract
+ * is defined later in S3.
+ */
+export interface SdkRunInput {
+  id: string;
+  title: string;
+  body: string;
+  project?: string;
+  allowedTools: string[];
+}
 
-export function buildPrompt(item: BacklogItem): string {
+export function buildPrompt(item: Pick<SdkRunInput, "title" | "body">): string {
   const lines = [
     `You are working on the following task autonomously.`,
     `Task: ${item.title}`,

@@ -78,6 +78,7 @@ function makeConfig(overrides: Partial<HeraldConfig> = {}): HeraldConfig {
     schedule: { times: ["09:00"], timezone: "America/Denver" },
     notify: { slack: { channel: "#herald" } },
     journalDir: "/fake/journal",
+    allowlist: [],
     ...overrides,
   };
 }

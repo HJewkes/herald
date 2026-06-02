@@ -1,3 +1,5 @@
+import { SocketModeClient } from "@slack/socket-mode";
+import type { InboundMsg, Transport } from "../core/contract.js";
 import type {
   SlackPostResult,
   SlackMessage,
@@ -216,4 +218,91 @@ export class SlackClient {
 export async function sendSlack(channel: string, text: string): Promise<void> {
   const client = new SlackClient();
   await client.postMessage(channel, text);
+}
+
+// --- Transport adapter (Socket Mode inbound + send) ---
+
+/** The Slack message event fields the transport reads. */
+interface SlackMessageEvent {
+  type: string;
+  channel?: string;
+  user?: string;
+  text?: string;
+  ts?: string;
+  thread_ts?: string;
+  subtype?: string;
+  bot_id?: string;
+}
+
+/** A Socket Mode event envelope (the relevant subset). */
+interface SocketEnvelope {
+  ack: () => Promise<void>;
+  event: SlackMessageEvent;
+}
+
+/** The slice of SocketModeClient the transport depends on (injectable for tests). */
+export interface SocketModeEmitter {
+  on(event: string, listener: (envelope: SocketEnvelope) => void): unknown;
+  start(): Promise<unknown>;
+}
+
+export interface SlackTransportOptions {
+  botToken?: string;
+  appToken?: string;
+  client?: SlackClient;
+  /** Override the Socket Mode client (tests inject a fake emitter). */
+  makeSocket?: (appToken: string) => SocketModeEmitter;
+}
+
+/**
+ * Slack channel adapter implementing the harness Transport contract. `send`
+ * reuses the fetch-based SlackClient; `listen` opens a Socket Mode WebSocket
+ * (no public port) and normalizes inbound message events to InboundMsg.
+ */
+export class SlackTransport implements Transport {
+  private readonly client: SlackClient;
+  private readonly appToken: string;
+  private readonly makeSocket: (appToken: string) => SocketModeEmitter;
+
+  constructor(opts: SlackTransportOptions = {}) {
+    this.client = opts.client ?? new SlackClient(opts.botToken);
+    this.appToken = opts.appToken ?? process.env.HERALD_SLACK_APP_TOKEN ?? "";
+    this.makeSocket =
+      opts.makeSocket ??
+      ((appToken) => new SocketModeClient({ appToken }) as SocketModeEmitter);
+  }
+
+  async send(channel: string, text: string, threadId?: string): Promise<void> {
+    await this.client.postMessage(channel, text, threadId);
+  }
+
+  async listen(handler: (msg: InboundMsg) => Promise<void>): Promise<void> {
+    if (!this.appToken) {
+      throw new Error("HERALD_SLACK_APP_TOKEN is not set");
+    }
+    const socket = this.makeSocket(this.appToken);
+    socket.on("message", async ({ event, ack }) => {
+      await ack();
+      const msg = normalizeMessage(event);
+      if (msg) await handler(msg);
+    });
+    await socket.start();
+  }
+}
+
+/**
+ * Normalize a raw Slack message event to InboundMsg, or null to ignore.
+ * Bot messages and edits/deletes (any subtype) are dropped to avoid echo
+ * loops and noise; messages missing a user/channel/ts are unprocessable.
+ */
+export function normalizeMessage(event: SlackMessageEvent): InboundMsg | null {
+  if (event.bot_id || event.subtype) return null;
+  if (!event.channel || !event.user || !event.ts) return null;
+  return {
+    channel: event.channel,
+    text: event.text ?? "",
+    sender: event.user,
+    ts: event.ts,
+    threadId: event.thread_ts,
+  };
 }

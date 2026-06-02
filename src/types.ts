@@ -3,6 +3,8 @@ export interface HeraldConfig {
   schedule: ScheduleConfig;
   notify: NotifyConfig;
   journalDir: string;
+  /** Physical sender IDs (e.g. Slack user IDs) allowed to reach the harness. */
+  allowlist: string[];
 }
 
 export interface BudgetConfig {

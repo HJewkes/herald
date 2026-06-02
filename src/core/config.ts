@@ -18,6 +18,7 @@ export const DEFAULT_CONFIG: HeraldConfig = {
     },
   },
   journalDir: "journal",
+  allowlist: [],
 };
 
 function validateConfig(config: Record<string, unknown>): HeraldConfig {
@@ -56,6 +57,11 @@ function validateConfig(config: Record<string, unknown>): HeraldConfig {
 
   if (typeof config.journalDir !== "string")
     throw new Error("Invalid config: journalDir must be a string");
+  if (
+    !Array.isArray(config.allowlist) ||
+    !config.allowlist.every((s) => typeof s === "string")
+  )
+    throw new Error("Invalid config: allowlist must be an array of strings");
 
   return config as unknown as HeraldConfig;
 }

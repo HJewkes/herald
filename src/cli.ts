@@ -31,6 +31,7 @@ import { configCommand } from "./commands/config.js";
 import { channelCommand } from "./commands/channel.js";
 import { testSlackCommand } from "./commands/test-slack.js";
 import { serveCommand } from "./commands/serve.js";
+import { hookCommand } from "./commands/hook.js";
 
 // Load .env from project root (passed via --project-root) or cwd
 const projectRootIdx = process.argv.indexOf("--project-root");
@@ -55,6 +56,7 @@ program.addCommand(configCommand);
 program.addCommand(channelCommand);
 program.addCommand(testSlackCommand);
 program.addCommand(serveCommand);
+program.addCommand(hookCommand);
 
 program.parseAsync().catch((err: Error) => {
   process.stderr.write(`Error: ${err.message}\n`);

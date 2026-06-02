@@ -7,4 +7,14 @@ export default tseslint.config(
   {
     ignores: ["dist/", "coverage/", "node_modules/"],
   },
+  {
+    rules: {
+      // Allow intentionally-unused names (e.g. interface-required params) when
+      // prefixed with an underscore.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
 );

@@ -30,4 +30,9 @@ npm run dev -- <command>     # Run CLI in dev mode
 npm test                     # Run tests
 npm run typecheck            # Type check
 npm run build                # Build with tsup
+npm run verify               # Format, lint, typecheck, build, test: the local gate
 ```
+
+## Verify before opening a PR
+
+Before `gh pr create`, run `npm run verify` in your worktree and report its last lines. The PR merges when the `check` context is green; if it is red, read `gh pr checks <n>` and the failing job's log, fix, and push to the same PR. CI-only steps: gitleaks, `npm audit --audit-level=critical`, and the codecov upload.

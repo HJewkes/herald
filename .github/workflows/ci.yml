@@ -3,9 +3,15 @@ name: CI
 on:
   push:
     branches: [main]
+  # Unfiltered so `check` reports on every PR, whatever it targets; a filtered-out required check blocks the merge.
   pull_request:
-    branches: [main]
 
+permissions:
+  contents: read
+
+# Rename stage (a) of the HJewkes/ci standard: the ruleset still requires gitleaks,
+# security-audit, lint, test and build, so those jobs keep their names until it
+# requires only `check`. A later PR replaces them with node.yml.
 jobs:
   gitleaks:
     runs-on: ubuntu-latest
@@ -36,9 +42,8 @@ jobs:
           node-version: '22'
           cache: 'npm'
       - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run typecheck
+      # verify is format, lint, typecheck, build and tests: the same gate as a local run.
+      - run: npm run verify
 
   test:
     runs-on: ubuntu-latest
@@ -68,3 +73,13 @@ jobs:
       - run: npm run build
       - name: Verify build output
         run: test -f dist/cli.js || (echo "Build output missing" && exit 1)
+
+  # The aggregator the ruleset will require; all-green also fails if a job here is missing from needs.
+  check:
+    if: always()
+    needs: [gitleaks, security-audit, lint, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: HJewkes/ci/actions/all-green@v1
+        with:
+          needs: ${{ toJSON(needs) }}

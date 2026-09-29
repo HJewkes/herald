@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src __tests__ --no-error-on-unmatched-pattern",
     "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\""
+    "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\"",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run build && vitest run"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^13.1.0",
